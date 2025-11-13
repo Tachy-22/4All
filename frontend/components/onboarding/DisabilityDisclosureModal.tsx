@@ -139,7 +139,17 @@ export function DisabilityDisclosureModal({
     const option = disabilityOptions.find(opt => opt.id === disabilityId);
     if (option) {
       const action = newDisabilities.includes(disabilityId) ? 'selected' : 'deselected';
-      speak(`${option.label} ${action}`);
+      
+      // Get remaining unselected options
+      const remainingOptions = disabilityOptions
+        .filter(opt => !newDisabilities.includes(opt.id))
+        .map(opt => opt.label);
+      
+      const remainingText = remainingOptions.length > 0 
+        ? `You can choose another need like ${remainingOptions.join(', ')}, or say Continue when ready.`
+        : 'Say Continue when ready.';
+      
+      speak(`${option.label} ${action}. ${remainingText}`);
     }
   };
 
@@ -399,7 +409,7 @@ export function DisabilityDisclosureModal({
                       <button
                         onClick={() => handleDisabilityToggle(option.id)}
                         className={cn(
-                          "w-full p-4 rounded-lg border-2 text-left transition-all",
+                          "w-full p- rounded-lg border-2 text-left transition-all",
                           adaptiveClasses.button,
                           isSelected
                             ? 'border-primary bg-primary/5'
@@ -421,9 +431,9 @@ export function DisabilityDisclosureModal({
                                 {option.label}
                               </span>
                             </div>
-                            <p className={cn(adaptiveClasses.text, "text-sm text-muted-gray")}>
+                            {/* <p className={cn(adaptiveClasses.text, "text-sm text-muted-gray")}>
                               {option.description}
-                            </p>
+                            </p> */}
                           </div>
                         </div>
                       </button>

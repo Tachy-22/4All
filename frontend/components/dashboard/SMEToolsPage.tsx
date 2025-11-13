@@ -636,7 +636,7 @@ export function SMEToolsPage() {
       </div>
 
       {/* Ziva Assistant */}
-      <ZivaAssistant />
+      {/* <ZivaAssistant /> */}
     </div>
   );
 }

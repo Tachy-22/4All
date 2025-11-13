@@ -616,7 +616,7 @@ export function BillsPaymentPage() {
       </div>
 
       {/* Ziva Assistant */}
-      <ZivaAssistant />
+      {/* <ZivaAssistant /> */}
     </div>
   );
 }

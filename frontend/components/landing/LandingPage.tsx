@@ -637,7 +637,7 @@ export function LandingPage() {
         </main>
 
         {/* Ziva Assistant */}
-        <ZivaAssistant />
+        {/* <ZivaAssistant /> */}
 
         {/* Screen Reader Announcements */}
         <div aria-live="polite" aria-atomic="true" className="sr-only">

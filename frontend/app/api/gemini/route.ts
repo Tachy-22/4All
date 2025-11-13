@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
 
 export async function POST(request: NextRequest) {
   let body: any;
-  let type: string;
+  let type: string = 'unknown';
   
   try {
     body = await request.json();
     const { prompt, context } = body;
-    type = body.type;
+    type = body.type || 'unknown';
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     let systemPrompt = "";
     
@@ -134,8 +134,7 @@ export async function POST(request: NextRequest) {
     
     // Fallback responses for different types
     let fallbackResponse;
-    const { type: requestType } = await request.json();
-    switch (requestType) {
+    switch (type) {
       case 'cognitive_assessment':
         fallbackResponse = {
           cognitiveScore: 5,
@@ -154,8 +153,11 @@ export async function POST(request: NextRequest) {
           reasoning: "Using standard accessibility settings due to service unavailability"
         };
         break;
+      case 'financial_coaching':
+        fallbackResponse = "I'm currently unavailable, but here's some general advice: Focus on budgeting with the 50/30/20 rule - 50% for needs, 30% for wants, and 20% for savings. Start an emergency fund if you haven't already. Please try again later for personalized advice.";
+        break;
       default:
-        fallbackResponse = { response: "I'm currently unavailable. Please try again later." };
+        fallbackResponse = "I'm currently unavailable. Please try again later.";
     }
 
     return NextResponse.json({

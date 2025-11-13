@@ -252,7 +252,9 @@ export function Dashboard() {
           adaptiveClasses.card, 
           "bg-primary-red text-white",
           adaptiveUI.layoutDensity === 'simplified' && "p-8",
-          adaptiveUI.contrastMode === 'high' && "border-4 border-white"
+          adaptiveUI.contrastMode === 'high' && "border-4 border-white shadow-2xl",
+          // Enhanced visual accessibility
+          profile?.disabilities?.includes('visual') && "ring-4 ring-white ring-offset-2 ring-offset-primary-red"
         )}>
           <div className={cn(
             "flex justify-between items-start",
@@ -260,9 +262,11 @@ export function Dashboard() {
           )}>
             <div className={cn("flex-1", adaptiveUI.layoutDensity === 'simplified' && "w-full")}>
               <p className={cn(
-                "text-white/80 mb-1",
+                "text-white/80 mb-1 font-semibold",
                 adaptiveClasses.text,
-                adaptiveUI.layoutDensity === 'simplified' && "text-xl mb-2"
+                adaptiveUI.layoutDensity === 'simplified' && "text-2xl mb-3",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-white font-bold text-2xl tracking-wide"
               )}>
                 Available Balance
               </p>
@@ -272,8 +276,10 @@ export function Dashboard() {
               )}>
                 <span className={cn(
                   "font-bold",
-                  adaptiveUI.layoutDensity === 'simplified' ? "text-5xl" : "text-3xl",
-                  adaptiveClasses.heading
+                  adaptiveUI.layoutDensity === 'simplified' ? "text-4xl" : "text-3xl",
+                  adaptiveClasses.heading,
+                  // Enhanced for visual accessibility
+                  profile?.disabilities?.includes('visual') && "text-5xl font-extrabold tracking-wider drop-shadow-lg"
                 )}>
                   {balanceVisible ? formatCurrency(mockData.balance) : '****'}
                 </span>
@@ -287,26 +293,38 @@ export function Dashboard() {
                   className={cn(
                     "text-white hover:bg-white/20",
                     adaptiveClasses.button,
-                    adaptiveUI.layoutDensity === 'simplified' && "min-w-[120px] h-14"
+                    adaptiveUI.layoutDensity === 'simplified' && "min-w-[120px] h-14",
+                    // Enhanced for visual accessibility
+                    profile?.disabilities?.includes('visual') && "min-w-[140px] h-16 text-lg font-bold border-2 border-white hover:bg-white hover:text-primary-red"
                   )}
                 >
                   {balanceVisible ? (
                     <>
-                      <EyeOff className={cn("w-4 h-4", adaptiveUI.layoutDensity === 'simplified' && "w-6 h-6 mr-2")} />
-                      {adaptiveUI.layoutDensity === 'simplified' && "Hide"}
+                      <EyeOff className={cn(
+                        "w-4 h-4", 
+                        adaptiveUI.layoutDensity === 'simplified' && "w-6 h-6 mr-2",
+                        profile?.disabilities?.includes('visual') && "w-8 h-8 mr-3"
+                      )} />
+                      {(adaptiveUI.layoutDensity === 'simplified' || profile?.disabilities?.includes('visual')) && "Hide"}
                     </>
                   ) : (
                     <>
-                      <Eye className={cn("w-4 h-4", adaptiveUI.layoutDensity === 'simplified' && "w-6 h-6 mr-2")} />
-                      {adaptiveUI.layoutDensity === 'simplified' && "Show"}
+                      <Eye className={cn(
+                        "w-4 h-4", 
+                        adaptiveUI.layoutDensity === 'simplified' && "w-6 h-6 mr-2",
+                        profile?.disabilities?.includes('visual') && "w-8 h-8 mr-3"
+                      )} />
+                      {(adaptiveUI.layoutDensity === 'simplified' || profile?.disabilities?.includes('visual')) && "Show"}
                     </>
                   )}
                 </Button>
               </div>
               <p className={cn(
-                "text-white/80",
+                "text-white/80 font-medium",
                 adaptiveClasses.text,
-                adaptiveUI.layoutDensity === 'simplified' && "text-lg mt-2"
+                adaptiveUI.layoutDensity === 'simplified' && "text-lg mt-2",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-white text-xl font-bold tracking-wide mt-3"
               )}>
                 Account: {mockData.accountNumber}
               </p>
@@ -483,7 +501,7 @@ export function Dashboard() {
         )}
       </div>
 
-      <ZivaAssistant />
+      {/* <ZivaAssistant /> */}
     </div>
   );
 }

@@ -64,9 +64,9 @@ const questions: QuizQuestion[] = [
     description: 'This helps us show you the right number of options at once',
     options: [
       { id: 'few_options', text: 'Just a few clear choices (2-3 options)', weight: 5 },
-      { id: 'some_options', text: 'Some options but not overwhelming (4-6 options)', weight: 3 },
-      { id: 'many_options', text: 'Many options so I can compare (7+ options)', weight: 1 },
-      { id: 'categories', text: 'Lots of options organized in groups/categories', weight: 2 }
+      { id: 'some_options', text: 'Some options (4-6 options)', weight: 3 },
+      { id: 'many_options', text: 'Many options  (7+ options)', weight: 1 },
+      { id: 'categories', text: 'Lots of options in groups', weight: 2 }
     ]
   }
 ];
@@ -346,7 +346,7 @@ export function NeurodivergentQuiz({
       }
 
       setShowCompletion(true);
-      speak('Analysis complete! Your interface has been personalized.');
+      speak('Analysis complete! Your interface has been personalized. Wait a minute, setting up your dashboard !');
 
       setTimeout(() => {
         onComplete(score, finalResponses, recommendations);
@@ -500,7 +500,7 @@ export function NeurodivergentQuiz({
                     onClick={() => handleOptionSelect(option.id)}
                     onMouseEnter={handleOptionHover}
                     className={cn(
-                      "w-full p-4 rounded-lg border-2 text-left transition-all",
+                      "w-full p- text-sm rounded-lg border-2 text-left transition-all",
                       adaptiveClasses.button,
                       selectedOption === option.id
                         ? 'border-primary bg-primary/5'

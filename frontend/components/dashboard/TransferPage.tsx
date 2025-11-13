@@ -301,22 +301,45 @@ export function TransferPage() {
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
 
   const renderTransferForm = () => (
-    <div className="space-y-6">
+    <div className={cn(
+      "space-y-6",
+      // Enhanced spacing for visual accessibility
+      profile?.disabilities?.includes('visual') && "space-y-12"
+    )}>
       <div>
-        <h2 className={cn(adaptiveClasses.heading, "text-2xl text-text mb-4")}>
+        <h2 className={cn(
+          adaptiveClasses.heading,
+          "text-2xl text-text mb-4",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "text-4xl font-extrabold tracking-wide text-primary-red"
+        )}>
           Send Money
         </h2>
-        <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
+        {/* <p className={cn(
+          adaptiveClasses.text, 
+          "text-muted-gray",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "text-xl font-semibold text-text"
+        )}>
           {interactionMode === 'voice'
             ? "Fill out the form below or use voice commands like 'Send ₦5000 to Ada'"
             : "Enter the transfer details below"
           }
-        </p>
+        </p> */}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className={cn(
+        "grid gap-4 md:grid-cols-2",
+        // Enhanced spacing for visual accessibility
+        profile?.disabilities?.includes('visual') && "gap-8"
+      )}>
         <div>
-          <Label htmlFor="amount" className={cn(adaptiveClasses.text, "font-medium")}>
+          <Label htmlFor="amount" className={cn(
+            adaptiveClasses.text,
+            "font-medium",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "text-xl font-bold tracking-wide"
+          )}>
             Amount *
           </Label>
           <Input
@@ -325,45 +348,83 @@ export function TransferPage() {
             placeholder="Enter amount"
             value={transferData.amount}
             onChange={(e) => setTransferData({ ...transferData, amount: e.target.value })}
-            className={cn(adaptiveClasses.input, errors.amount && "border-danger")}
+            className={cn(
+              adaptiveClasses.input,
+              errors.amount && "border-danger",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-16 text-2xl font-bold border-4 border-primary-red focus:ring-4 focus:ring-primary-red/50"
+            )}
             aria-invalid={!!errors.amount}
             aria-describedby={errors.amount ? "amount-error" : undefined}
           />
           {errors.amount && (
-            <p id="amount-error" className="text-sm text-danger mt-1" role="alert">
+            <p id="amount-error" className={cn(
+              "text-sm text-danger mt-1",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-lg font-bold text-red-700"
+            )} role="alert">
               {errors.amount}
             </p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="fromAccount" className={cn(adaptiveClasses.text, "font-medium")}>
+          <Label htmlFor="fromAccount" className={cn(
+            adaptiveClasses.text,
+            "font-medium",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "text-xl font-bold tracking-wide"
+          )}>
             From Account *
           </Label>
           <Select
             value={transferData.fromAccount}
             onValueChange={(value) => setTransferData({ ...transferData, fromAccount: value })}
           >
-            <SelectTrigger className={cn(adaptiveClasses.input, errors.fromAccount && "border-danger")}>
+            <SelectTrigger className={cn(
+              adaptiveClasses.input,
+              errors.fromAccount && "border-danger",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-16 text-xl font-bold border-4 border-primary-red"
+            )}>
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={cn(
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-xl border-4 border-primary-red"
+            )}>
               {mockAccounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
+                <SelectItem
+                  key={account.id}
+                  value={account.id}
+                  className={cn(
+                    // Enhanced for visual accessibility
+                    profile?.disabilities?.includes('visual') && "text-lg font-bold py-4 px-6 hover:bg-primary-red/20"
+                  )}
+                >
                   {account.name} - {formatCurrency(account.balance)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {errors.fromAccount && (
-            <p className="text-sm text-danger mt-1" role="alert">
+            <p className={cn(
+              "text-sm text-danger mt-1",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-lg font-bold text-red-700"
+            )} role="alert">
               {errors.fromAccount}
             </p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="recipient" className={cn(adaptiveClasses.text, "font-medium")}>
+          <Label htmlFor="recipient" className={cn(
+            adaptiveClasses.text,
+            "font-medium",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "text-xl font-bold tracking-wide"
+          )}>
             Choose Recipient *
           </Label>
           <Select
@@ -380,29 +441,61 @@ export function TransferPage() {
               }
             }}
           >
-            <SelectTrigger className={cn(adaptiveClasses.input, errors.recipient && "border-danger")}>
+            <SelectTrigger className={cn(
+              adaptiveClasses.input,
+              errors.recipient && "border-danger",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-16 text-xl font-bold border-4 border-primary-red"
+            )}>
               <SelectValue placeholder="Select a recipient" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={cn(
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-xl border-4 border-primary-red"
+            )}>
               {mockRecipients.map((recipient) => (
-                <SelectItem key={recipient.id} value={recipient.id}>
+                <SelectItem
+                  key={recipient.id}
+                  value={recipient.id}
+                  className={cn(
+                    // Enhanced for visual accessibility
+                    profile?.disabilities?.includes('visual') && "py-4 px-6 hover:bg-primary-red/20"
+                  )}
+                >
                   <div className="flex flex-col">
-                    <span className="font-medium">{recipient.name}</span>
-                    <span className="text-sm text-muted-gray">{recipient.accountNumber} • {recipient.bank}</span>
+                    <span className={cn(
+                      "font-medium",
+                      // Enhanced for visual accessibility
+                      profile?.disabilities?.includes('visual') && "text-lg font-bold"
+                    )}>{recipient.name} - {recipient.bank}</span>
+                    {/* <span className={cn(
+                      "text-sm text-muted-gray",
+                      // Enhanced for visual accessibility
+                      profile?.disabilities?.includes('visual') && "text-base font-semibold text-gray-700"
+                    )}>{recipient.accountNumber} • {recipient.bank}</span> */}
                   </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {errors.recipient && (
-            <p className="text-sm text-danger mt-1" role="alert">
+            <p className={cn(
+              "text-sm text-danger mt-1",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-lg font-bold text-red-700"
+            )} role="alert">
               {errors.recipient}
             </p>
           )}
         </div>
 
         <div className="md:col-span-2">
-          <Label htmlFor="narration" className={cn(adaptiveClasses.text, "font-medium")}>
+          <Label htmlFor="narration" className={cn(
+            adaptiveClasses.text,
+            "font-medium",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "text-xl font-bold tracking-wide"
+          )}>
             Narration (Optional)
           </Label>
           <Input
@@ -410,7 +503,11 @@ export function TransferPage() {
             placeholder="What is this transfer for?"
             value={transferData.narration}
             onChange={(e) => setTransferData({ ...transferData, narration: e.target.value })}
-            className={adaptiveClasses.input}
+            className={cn(
+              adaptiveClasses.input,
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-16 text-xl font-bold border-4 border-primary-red focus:ring-4 focus:ring-primary-red/50"
+            )}
           />
         </div>
       </div>
@@ -456,30 +553,42 @@ export function TransferPage() {
       )}
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
+      <div className="flex gap-3 items-center mt-8 pt-6 border-t border-border">
         <Button
           variant="outline"
           onClick={() => router.back()}
           className={cn(
             adaptiveClasses.button,
-            "border-muted-gray text-muted-gray hover:bg-muted-gray/10"
+            "border-muted-gray text-muted-gray hover:bg-muted-gray/10",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "h-16 text-lg font-bold border-4 border-gray-500 "
           )}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
+          <ArrowLeft className={cn(
+            "w-4 h-4 mr-2",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "w-6 h-6 mr-3"
+          )} />
+          Back
         </Button>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 w-full">
           {currentStep > 0 && (
             <Button
               variant="outline"
               onClick={handleBack}
               className={cn(
                 adaptiveClasses.button,
-                "border-primary-red text-primary-red hover:bg-primary-red/10"
+                "border-primary-red text-primary-red hover:bg-primary-red/10 w-full",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "h-16 text-lg font-bold border-4 border-primary-red px-8"
               )}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className={cn(
+                "w-4 h-4 mr-2",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "w-6 h-6 mr-3"
+              )} />
               Previous
             </Button>
           )}
@@ -488,19 +597,29 @@ export function TransferPage() {
             onClick={handleNext}
             className={cn(
               adaptiveClasses.button,
-              "bg-primary-red text-white hover:bg-primary-red/90"
+              "bg-primary-red text-white hover:bg-primary-red/90 w-full",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-16 text-lg font-bold px-8 shadow-lg"
             )}
             disabled={isProcessing}
           >
             {currentStep === steps.length - 1 ? (
               <>
                 Complete Transfer
-                <CheckCircle className="w-4 h-4 ml-2" />
+                <CheckCircle className={cn(
+                  "w-4 h-4 ml-2",
+                  // Enhanced for visual accessibility
+                  profile?.disabilities?.includes('visual') && "w-6 h-6 ml-3"
+                )} />
               </>
             ) : (
               <>
-                Next: {steps[currentStep + 1]?.title}
-                <Send className="w-4 h-4 ml-2" />
+                {steps[currentStep + 1]?.title}
+                <Send className={cn(
+                  "w-4 h-4 ml-2",
+                  // Enhanced for visual accessibility
+                  profile?.disabilities?.includes('visual') && "w-6 h-6 ml-3"
+                )} />
               </>
             )}
           </Button>
@@ -510,49 +629,121 @@ export function TransferPage() {
   );
 
   const renderConfirmation = () => (
-    <div className="space-y-6">
+    <div className={cn(
+      "space-y-6",
+      // Enhanced spacing for visual accessibility
+      profile?.disabilities?.includes('visual') && "space-y-12"
+    )}>
       <div className="text-center">
-        <Shield className="w-12 h-12 text-primary-red mx-auto mb-4" />
-        <h2 className={cn(adaptiveClasses.heading, "text-2xl text-text mb-2")}>
+        <Shield className={cn(
+          "w-12 h-12 text-primary-red mx-auto mb-4",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "w-20 h-20 mb-6"
+        )} />
+        <h2 className={cn(
+          adaptiveClasses.heading,
+          "text-2xl text-text mb-2",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "text-4xl font-extrabold tracking-wide text-primary-red mb-4"
+        )}>
           Confirm Transfer
         </h2>
-        <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
+        <p className={cn(
+          adaptiveClasses.text,
+          "text-muted-gray",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "text-xl font-semibold text-text"
+        )}>
           Please review your transfer details carefully
         </p>
       </div>
 
-      <Card className={cn(adaptiveClasses.card, "bg-bg-white")}>
-        <div className="space-y-4">
+      <Card className={cn(
+        adaptiveClasses.card,
+        "bg-bg-white",
+        // Enhanced for visual accessibility
+        profile?.disabilities?.includes('visual') && "border-4 border-primary-red p-8"
+      )}>
+        <div className={cn(
+          "space-y-4",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual') && "space-y-8"
+        )}>
           <div className="flex justify-between items-center">
-            <span className={cn(adaptiveClasses.text, "text-muted-gray")}>Amount</span>
-            <span className={cn(adaptiveClasses.text, "text-2xl font-bold text-text")}>
+            <span className={cn(
+              adaptiveClasses.text,
+              "text-muted-gray",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-xl font-bold text-text"
+            )}>Amount</span>
+            <span className={cn(
+              adaptiveClasses.text,
+              "text-2xl font-bold text-text",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-4xl font-extrabold text-primary-red"
+            )}>
               {formatCurrency(parseFloat(transferData.amount))}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className={cn(adaptiveClasses.text, "text-muted-gray")}>To</span>
+            <span className={cn(
+              adaptiveClasses.text,
+              "text-muted-gray",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-xl font-bold text-text"
+            )}>To</span>
             <div className="text-right">
-              <p className={cn(adaptiveClasses.text, "font-medium text-text")}>
+              <p className={cn(
+                adaptiveClasses.text,
+                "font-medium text-text",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-2xl font-bold"
+              )}>
                 {transferData.recipient}
               </p>
-              <p className={cn(adaptiveClasses.text, "text-sm text-muted-gray")}>
+              <p className={cn(
+                adaptiveClasses.text,
+                "text-sm text-muted-gray",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-lg font-semibold text-gray-700"
+              )}>
                 {transferData.recipientAccount}
               </p>
             </div>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className={cn(adaptiveClasses.text, "text-muted-gray")}>From</span>
-            <span className={cn(adaptiveClasses.text, "font-medium text-text")}>
+            <span className={cn(
+              adaptiveClasses.text,
+              "text-muted-gray",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-xl font-bold text-text"
+            )}>From</span>
+            <span className={cn(
+              adaptiveClasses.text,
+              "font-medium text-text",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-2xl font-bold"
+            )}>
               {mockAccounts.find(acc => acc.id === transferData.fromAccount)?.name}
             </span>
           </div>
 
           {transferData.narration && (
             <div className="flex justify-between items-center">
-              <span className={cn(adaptiveClasses.text, "text-muted-gray")}>Narration</span>
-              <span className={cn(adaptiveClasses.text, "font-medium text-text")}>
+              <span className={cn(
+                adaptiveClasses.text,
+                "text-muted-gray",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-xl font-bold text-text"
+              )}>Narration</span>
+              <span className={cn(
+                adaptiveClasses.text,
+                "font-medium text-text",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "text-2xl font-bold"
+              )}>
                 {transferData.narration}
               </span>
             </div>
@@ -564,7 +755,12 @@ export function TransferPage() {
         <Button
           variant="outline"
           onClick={handleBack}
-          className={cn(adaptiveClasses.button, "flex-1")}
+          className={cn(
+            adaptiveClasses.button,
+            "flex-1",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "h-16 text-lg font-bold border-4 border-gray-500"
+          )}
           disabled={isProcessing}
         >
           Back to Edit
@@ -573,16 +769,29 @@ export function TransferPage() {
         <Button
           onClick={handleConfirm}
           disabled={isProcessing}
-          className={cn(adaptiveClasses.button, "flex-1 bg-primary-red text-white hover:bg-primary-red/90")}
+          className={cn(
+            adaptiveClasses.button,
+            "flex-1 bg-primary-red text-white hover:bg-primary-red/90",
+            // Enhanced for visual accessibility
+            profile?.disabilities?.includes('visual') && "h-16 text-lg font-bold shadow-lg"
+          )}
         >
           {isProcessing ? (
             <>
-              <Clock className="w-4 h-4 mr-2 animate-spin" />
+              <Clock className={cn(
+                "w-4 h-4 mr-2 animate-spin",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "w-6 h-6 mr-3"
+              )} />
               Processing...
             </>
           ) : (
             <>
-              <Send className="w-4 h-4 mr-2" />
+              <Send className={cn(
+                "w-4 h-4 mr-2",
+                // Enhanced for visual accessibility
+                profile?.disabilities?.includes('visual') && "w-6 h-6 mr-3"
+              )} />
               {adaptiveUI.confirmMode === 'voice' ? 'Confirm with Voice' : 'Send Money'}
             </>
           )}
@@ -662,37 +871,68 @@ export function TransferPage() {
   return (
     <div className="min-h-screen bg-bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-border p-4">
+      <header className={cn(
+        "bg-white border-b border-border p-4",
+        // Enhanced for visual accessibility
+        profile?.disabilities?.includes('visual') && "p-6"
+      )}>
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="text-muted-gray hover:text-text"
+            className={cn(
+              "text-muted-gray hover:text-text",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "h-12 text-lg font-bold border-2 border-gray-500 px-4"
+            )}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className={cn(
+              "w-4 h-4 mr-2",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "w-6 h-6 mr-3"
+            )} />
             Back
           </Button>
 
           <div>
-            <h1 className={cn(adaptiveClasses.heading, "text-primary-red")}>
+            <h1 className={cn(
+              adaptiveClasses.heading,
+              "text-primary-red",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-3xl font-extrabold tracking-wide"
+            )}>
               Money Transfer
             </h1>
-            <p className={cn(adaptiveClasses.text, "text-sm text-muted-gray")}>
+            <p className={cn(
+              adaptiveClasses.text,
+              "text-sm text-muted-gray",
+              // Enhanced for visual accessibility
+              profile?.disabilities?.includes('visual') && "text-lg font-semibold text-text"
+            )}>
               Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
             </p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto p-4">
-        <Card className={cn(adaptiveClasses.card, "min-h-[500px]")}>
+      <div className={cn(
+        "max-w- w-full mx-auto p-",
+        // Enhanced for visual accessibility
+        profile?.disabilities?.includes('visual')
+      )}>
+        <Card className={cn(
+          adaptiveClasses.card,
+          "min-h-[500px] w-screen",
+          // Enhanced for visual accessibility
+          profile?.disabilities?.includes('visual')
+        )}>
           {renderCurrentStep()}
         </Card>
       </div>
 
       {/* Ziva Assistant */}
-      <ZivaAssistant />
+      {/* <ZivaAssistant /> */}
     </div>
   );
 }
