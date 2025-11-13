@@ -10,11 +10,11 @@ import { useVoice } from '@/hooks/useVoice';
 import { useAdaptiveUI } from '@/hooks/useAdaptiveUI';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
-import { 
-  Search, 
-  Filter, 
+import {
+  Search,
+  Filter,
   Download,
-  Mic, 
+  Mic,
   MicOff,
   Clock,
   CheckCircle,
@@ -97,7 +97,7 @@ export function TransactionTrackerPage() {
     } catch (error) {
       console.error('Error loading transactions:', error);
       speak("Failed to load transactions. Showing offline data.");
-      
+
       // Fallback to mock data when API is unavailable
       const mockTransactions: Transaction[] = [
         {
@@ -182,7 +182,7 @@ export function TransactionTrackerPage() {
     setIsListening(true);
     speak("What would you like to search for?");
     startListening();
-    
+
     // Set up a timeout to stop listening after 10 seconds
     setTimeout(() => {
       if (isListening) {
@@ -196,10 +196,10 @@ export function TransactionTrackerPage() {
   useEffect(() => {
     if (transcript && isListening) {
       setIsListening(false);
-      
+
       // Process voice commands
       const command = transcript.toLowerCase();
-      
+
       if (command.includes('pending')) {
         setStatusFilter('pending');
         speak(`Showing ${filteredTransactions.filter(t => t.status === 'pending').length} pending transactions.`);
@@ -266,11 +266,11 @@ export function TransactionTrackerPage() {
 
   const getTypeIcon = (type: string, amount: number) => {
     if (type === 'deposit' || type === 'withdrawal') {
-      return type === 'deposit' ? 
+      return type === 'deposit' ?
         <ArrowDownLeft className="w-4 h-4 text-green-500" /> :
         <ArrowUpRight className="w-4 h-4 text-red-500" />;
     }
-    return amount > 0 ? 
+    return amount > 0 ?
       <ArrowUpRight className="w-4 h-4 text-red-500" /> :
       <ArrowDownLeft className="w-4 h-4 text-green-500" />;
   };
@@ -280,11 +280,11 @@ export function TransactionTrackerPage() {
     if (typeof amount !== 'number' || isNaN(amount)) {
       return '₦0.00';
     }
-    
+
     if (!currency || typeof currency !== 'string') {
       currency = 'NGN'; // Default to Nigerian Naira
     }
-    
+
     try {
       return new Intl.NumberFormat('en-NG', {
         style: 'currency',
@@ -302,7 +302,7 @@ export function TransactionTrackerPage() {
     if (!timestamp || isNaN(timestamp) || !isFinite(timestamp)) {
       return 'Invalid date';
     }
-    
+
     try {
       return new Intl.DateTimeFormat('en-NG', {
         month: 'short',
@@ -349,26 +349,26 @@ export function TransactionTrackerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 
+          <h1
             className="text-3xl font-bold text-gray-900"
             style={{ fontSize: adaptiveUI.fontSize.xl }}
           >
             Transaction Tracker
           </h1>
-          <p 
+          <p
             className="text-gray-600 mt-1"
             style={{ fontSize: adaptiveUI.fontSize.sm }}
           >
             Track and search your transaction history
           </p>
         </div>
-        
+
         <Button
           onClick={exportTransactions}
           disabled={filteredTransactions.length === 0}
-          style={{ 
+          style={{
             minHeight: `${adaptiveUI.touchTarget.min}px`,
-            fontSize: adaptiveUI.fontSize.sm 
+            fontSize: adaptiveUI.fontSize.sm
           }}
         >
           <Download className="w-4 h-4 mr-2" />
@@ -393,9 +393,9 @@ export function TransactionTrackerPage() {
                     trackTextInteraction('transaction_search');
                   }}
                   className="pl-10"
-                  style={{ 
+                  style={{
                     minHeight: `${adaptiveUI.touchTarget.min}px`,
-                    fontSize: adaptiveUI.fontSize.base 
+                    fontSize: adaptiveUI.fontSize.base
                   }}
                 />
                 {interactionMode === 'voice' && (
@@ -420,9 +420,9 @@ export function TransactionTrackerPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md bg-white"
-              style={{ 
+              style={{
                 minHeight: `${adaptiveUI.touchTarget.min}px`,
-                fontSize: adaptiveUI.fontSize.base 
+                fontSize: adaptiveUI.fontSize.base
               }}
             >
               <option value="all">All Status</option>
@@ -438,9 +438,9 @@ export function TransactionTrackerPage() {
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md bg-white"
-              style={{ 
+              style={{
                 minHeight: `${adaptiveUI.touchTarget.min}px`,
-                fontSize: adaptiveUI.fontSize.base 
+                fontSize: adaptiveUI.fontSize.base
               }}
             >
               <option value="all">All Types</option>
@@ -452,7 +452,7 @@ export function TransactionTrackerPage() {
           </div>
 
           {/* Results Summary */}
-          <div 
+          <div
             className="mt-4 text-sm text-gray-600"
             style={{ fontSize: adaptiveUI.fontSize.sm }}
           >
@@ -476,7 +476,7 @@ export function TransactionTrackerPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <p 
+                <p
                   className="text-gray-500"
                   style={{ fontSize: adaptiveUI.fontSize.base }}
                 >
@@ -487,8 +487,8 @@ export function TransactionTrackerPage() {
           </Card>
         ) : (
           filteredTransactions.map((transaction) => (
-            <Card 
-              key={transaction.id} 
+            <Card
+              key={transaction.id}
               className="hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => setSelectedTransaction(transaction)}
             >
@@ -499,33 +499,33 @@ export function TransactionTrackerPage() {
                     <div className="flex-shrink-0 mt-1">
                       {getTypeIcon(transaction.type, transaction.amount)}
                     </div>
-                    
+
                     {/* Transaction Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 
+                          <h3
                             className="font-medium text-gray-900 truncate"
                             style={{ fontSize: adaptiveUI.fontSize.base }}
                           >
                             {transaction.description}
                           </h3>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm mt-1"
                             style={{ fontSize: adaptiveUI.fontSize.sm }}
                           >
                             {transaction.recipient || transaction.sender} • {transaction.reference}
                           </p>
-                          <p 
+                          <p
                             className="text-gray-400 text-xs mt-1"
                             style={{ fontSize: adaptiveUI.fontSize.xs }}
                           >
                             {formatDate(transaction.timestamp)} • {transaction.metadata?.channel || 'Unknown'}
                           </p>
                         </div>
-                        
+
                         <div className="text-right">
-                          <p 
+                          <p
                             className="font-semibold text-gray-900"
                             style={{ fontSize: adaptiveUI.fontSize.base }}
                           >
@@ -534,7 +534,7 @@ export function TransactionTrackerPage() {
                           </p>
                           <div className="flex items-center justify-end mt-2">
                             {getStatusIcon(transaction.status)}
-                            <Badge 
+                            <Badge
                               className={`ml-2 ${getStatusColor(transaction.status)}`}
                               style={{ fontSize: adaptiveUI.fontSize.xs }}
                             >
@@ -555,14 +555,14 @@ export function TransactionTrackerPage() {
       {/* Transaction Details Modal */}
       {selectedTransaction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CardHeader>
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 p-0">
+            <CardHeader className="p-6">
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle style={{ fontSize: adaptiveUI.fontSize.lg }}>
                     Transaction Details
                   </CardTitle>
-                  <p 
+                  <p
                     className="text-gray-600 mt-1"
                     style={{ fontSize: adaptiveUI.fontSize.sm }}
                   >
@@ -579,13 +579,13 @@ export function TransactionTrackerPage() {
                 </Button>
               </div>
             </CardHeader>
-            
-            <CardContent className="space-y-6">
+
+            <CardContent className="space-y-6 p-6 pt-0">
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Amount</p>
-                  <p 
+                  <p
                     className="text-lg font-semibold"
                     style={{ fontSize: adaptiveUI.fontSize.base }}
                   >
@@ -596,7 +596,7 @@ export function TransactionTrackerPage() {
                   <p className="text-sm font-medium text-gray-500">Status</p>
                   <div className="flex items-center mt-1">
                     {getStatusIcon(selectedTransaction.status)}
-                    <Badge 
+                    <Badge
                       className={`ml-2 ${getStatusColor(selectedTransaction.status)}`}
                     >
                       {selectedTransaction.status}
@@ -619,7 +619,7 @@ export function TransactionTrackerPage() {
 
               {/* Timeline */}
               <div>
-                <h4 
+                <h4
                   className="font-medium text-gray-900 mb-4"
                   style={{ fontSize: adaptiveUI.fontSize.base }}
                 >
@@ -632,13 +632,13 @@ export function TransactionTrackerPage() {
                         {getStatusIcon(event.status)}
                       </div>
                       <div className="flex-1">
-                        <p 
+                        <p
                           className="font-medium"
                           style={{ fontSize: adaptiveUI.fontSize.sm }}
                         >
                           {event.description}
                         </p>
-                        <p 
+                        <p
                           className="text-gray-500 text-xs"
                           style={{ fontSize: adaptiveUI.fontSize.xs }}
                         >
@@ -653,7 +653,7 @@ export function TransactionTrackerPage() {
 
               {/* Additional Details */}
               <div>
-                <h4 
+                <h4
                   className="font-medium text-gray-900 mb-3"
                   style={{ fontSize: adaptiveUI.fontSize.base }}
                 >
@@ -662,7 +662,7 @@ export function TransactionTrackerPage() {
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Transaction ID:</span>
-                    <span 
+                    <span
                       className="text-sm font-mono"
                       style={{ fontSize: adaptiveUI.fontSize.xs }}
                     >

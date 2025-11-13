@@ -302,7 +302,7 @@ export function LandingPage() {
     announceToScreenReader('Starting personalized banking onboarding experience.');
     speak('Starting your personalized onboarding. This will help us customize your banking experience.');
     setInteractionMode('voice');
-    
+
     // Show onboarding wizard directly on landing page
     setTimeout(() => {
       setShowOnboardingWizard(true);
@@ -315,7 +315,7 @@ export function LandingPage() {
     setInteractionMode('voice');
     setTimeout(() => router.push('/dashboard'), 1000);
   };
-  
+
   // Handle onboarding completion
   const handleOnboardingComplete = () => {
     setShowOnboardingWizard(false);
@@ -645,7 +645,7 @@ export function LandingPage() {
             <div key={index}>{announcement}</div>
           ))}
         </div>
-        
+
         {/* Hidden help text */}
         <div className="sr-only">
           <p id="keyboard-help">
@@ -663,19 +663,19 @@ export function LandingPage() {
           )}
         </div>
       </div>
-      
+
       {/* Onboarding Wizard Overlay */}
       {showOnboardingWizard && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-white bg-opacity-50 flex items-center justify-center p-">
           <div className="w-full max-w-4xl relative">
-            <button 
+            <button
               onClick={handleOnboardingClose}
               className="absolute -top-12 right-0 text-white hover:text-gray-300 z-10"
               aria-label="Close onboarding"
             >
               ✕ Close
             </button>
-            <OnboardingWizard 
+            <OnboardingWizard
               onComplete={handleOnboardingComplete}
               skipWelcome={true}
               initialLanguage={selectedLanguage}

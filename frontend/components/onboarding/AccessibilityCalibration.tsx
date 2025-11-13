@@ -25,7 +25,7 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
   const [captions, setCaptions] = useState(false);
   const [font, setFont] = useState<'inter' | 'atkinson'>('inter');
   const [hasChanges, setHasChanges] = useState(false);
-  
+
   const disabilities = useDisabilities();
   const currentPrefs = useAccessibilityPreferences();
   const { speak } = useVoice();
@@ -41,10 +41,10 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
     setCaptions(currentPrefs.captions);
     setFont(currentPrefs.font);
 
-    const message = disabilities.length > 0 
+    const message = disabilities.length > 0
       ? "Let's fine-tune your accessibility settings based on your needs."
       : "You can customize accessibility features here, or skip this step if you prefer the defaults.";
-    
+
     setTimeout(() => speak(message), 500);
   }, [disabilities, currentPrefs, speak]);
 
@@ -116,7 +116,7 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
                   className="w-full"
                   aria-label="Font size"
                 />
-                <div 
+                <div
                   style={{ fontSize: `${fontSize}px` }}
                   className="mt-2 p-2 border rounded text-text"
                 >
@@ -272,10 +272,10 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
         )}
 
         {/* Preview Card */}
-        <Card 
+        <Card
           className={cn(
             adaptiveClasses.card,
-            contrast === 'high' ? "bg-black text-white border-white" : "bg-bg-white"
+            contrast === 'high' ? "bg-white text-white border-white" : "bg-bg-white"
           )}
         >
           <div className="flex items-center gap-2 mb-4">
@@ -284,9 +284,9 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
               Preview
             </h3>
           </div>
-          
-          <div 
-            style={{ 
+
+          <div
+            style={{
               fontSize: `${fontSize}px`,
               fontFamily: font === 'atkinson' ? 'Atkinson Hyperlegible, sans-serif' : 'Inter, sans-serif'
             }}
@@ -328,7 +328,7 @@ export function AccessibilityCalibration({ onNext, onBack }: AccessibilityCalibr
           >
             Skip
           </Button>
-          
+
           <Button
             onClick={handleSave}
             className={cn(

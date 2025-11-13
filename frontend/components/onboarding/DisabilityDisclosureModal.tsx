@@ -274,8 +274,8 @@ export function DisabilityDisclosureModal({
     (selectedOption !== 'yes' || selectedDisabilities.length > 0 || showDetails);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+    <div className="fixed inset-0 bg-white flex items-start justify-start z-50 ">
+      <Card className="w-screen max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <div className="p-6 space-y-6">
           {/* Voice Control Status */}
           {transcript && isListening && (
@@ -313,7 +313,7 @@ export function DisabilityDisclosureModal({
             <button
               onClick={() => handleOptionSelect('no')}
               className={cn(
-                "w-full p-4 rounded-lg border-2 text-left transition-all",
+                "w-full p- rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
                 selectedOption === 'no'
                   ? 'border-primary bg-primary/5'
@@ -337,7 +337,7 @@ export function DisabilityDisclosureModal({
             <button
               onClick={() => handleOptionSelect('yes')}
               className={cn(
-                "w-full p-4 rounded-lg border-2 text-left transition-all",
+                "w-full p- rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
                 selectedOption === 'yes'
                   ? 'border-primary bg-primary/5'
@@ -361,7 +361,7 @@ export function DisabilityDisclosureModal({
             <button
               onClick={() => handleOptionSelect('prefer_not_to_say')}
               className={cn(
-                "w-full p-4 rounded-lg border-2 text-left transition-all",
+                "w-full p- rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
                 selectedOption === 'prefer_not_to_say'
                   ? 'border-primary bg-primary/5'

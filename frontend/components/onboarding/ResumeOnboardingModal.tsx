@@ -53,12 +53,12 @@ const stepNames = {
   }
 };
 
-export function ResumeOnboardingModal({ 
-  isOpen, 
-  onResume, 
-  onStartOver, 
+export function ResumeOnboardingModal({
+  isOpen,
+  onResume,
+  onStartOver,
   progressStep,
-  language = 'en' 
+  language = 'en'
 }: ResumeOnboardingModalProps) {
   const { speak } = useVoice();
   const adaptiveClasses = useAdaptiveClasses();
@@ -80,7 +80,7 @@ export function ResumeOnboardingModal({
   const stepDisplayName = steps[progressStep as keyof typeof steps] || progressStep;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-md bg-white">
         <div className="p-6 space-y-6">
           {/* Header */}
@@ -90,11 +90,11 @@ export function ResumeOnboardingModal({
                 <Clock className="h-8 w-8 text-primary" />
               </div>
             </div>
-            
+
             <h2 className={cn(adaptiveClasses.heading, "text-xl font-semibold text-text")}>
               {t.title}
             </h2>
-            
+
             <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
               {t.subtitle}
             </p>
@@ -108,7 +108,7 @@ export function ResumeOnboardingModal({
                 {t.last_step.replace('{step}', stepDisplayName)}
               </span>
             </div>
-            
+
             <p className={cn(adaptiveClasses.text, "text-xs text-muted-gray")}>
               {t.time_saved}
             </p>
@@ -116,7 +116,7 @@ export function ResumeOnboardingModal({
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button 
+            <Button
               onClick={handleResume}
               className={cn(adaptiveClasses.touchTarget, "w-full")}
               size="lg"
@@ -124,8 +124,8 @@ export function ResumeOnboardingModal({
               <Play className="h-4 w-4 mr-2" />
               {t.resume_button}
             </Button>
-            
-            <Button 
+
+            <Button
               variant="outline"
               onClick={handleStartOver}
               className={cn(adaptiveClasses.touchTarget, "w-full")}

@@ -447,7 +447,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   }, [currentStep, progress, skipLanguageSelection]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen min-w-screen bg-white flex ">
 
       {/* Disability Disclosure Modal */}
       <DisabilityDisclosureModal
@@ -475,7 +475,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       />
 
       {/* Main Content */}
-      <Card className="w-full max-w-2xl bg-white shadow-xl">
+      <Card className="w-screen max-w-screen bg-white shadow-xl">
         <div className="p-8 space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -655,15 +655,15 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                 <button
                   onClick={() => handleInteractionModeSelect('voice')}
                   className={cn(
-                    "w-full p-6 rounded-lg border-2 text-left transition-all",
+                    "w-full p- rounded-lg border-2 text-left transition-all",
                     adaptiveClasses.button,
                     'border-gray-200 hover:border-primary hover:bg-primary/5'
                   )}
                 >
-                  <div className="flex items-start gap-4">
-                    <Mic className="h-8 w-8 text-primary shrink-0 mt-1" />
+                  <div className="flex items-start gap-3">
+                    <Mic className="h-5 w-5 text-primary shrink-0 " />
                     <div className="flex-1">
-                      <h3 className={cn(adaptiveClasses.text, "text-lg font-medium text-text")}>
+                      <h3 className={cn(adaptiveClasses.text, "text-base font-medium text-text")}>
                         {t.voice_option}
                       </h3>
                       {/* <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
@@ -677,15 +677,15 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                 <button
                   onClick={() => handleInteractionModeSelect('text')}
                   className={cn(
-                    "w-full p-6 rounded-lg border-2 text-left transition-all",
+                    "w-full p- rounded-lg border-2 text-left transition-all",
                     adaptiveClasses.button,
                     'border-gray-200 hover:border-primary hover:bg-primary/5'
                   )}
                 >
-                  <div className="flex items-start gap-4">
-                    <MessageSquare className="h-8 w-8 text-primary shrink-0 mt-1" />
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-1" />
                     <div className="flex-1">
-                      <h3 className={cn(adaptiveClasses.text, "text-lg font-medium text-text")}>
+                      <h3 className={cn(adaptiveClasses.text, "text-base font-medium text-text")}>
                         {t.text_option}
                       </h3>
                       {/* <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
