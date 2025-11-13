@@ -5,9 +5,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(request: NextRequest) {
+  let body: any;
+  let type: string;
+  
   try {
-    const body = await request.json();
-    const { prompt, type, context } = body;
+    body = await request.json();
+    const { prompt, context } = body;
+    type = body.type;
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -67,11 +71,11 @@ export async function POST(request: NextRequest) {
         ${userData ? `
         - Current Balance: ₦${userData.currentBalance?.toLocaleString()}
         - Monthly Income: ₦${userData.monthlyIncome?.toLocaleString()}
-        - Recent Spending: ${Object.entries(userData.recentSpending || {}).map(([category, amount]) => `${category}: ₦${amount.toLocaleString()}`).join(', ')}
+        - Recent Spending: ${Object.entries(userData.recentSpending || {}).map(([category, amount]) => `${category}: ₦${(amount as number).toLocaleString()}`).join(', ')}
         ` : 'Financial data not available'}
         
         CONVERSATION CONTEXT:
-        ${previousMessages.length > 0 ? `Recent conversation: ${previousMessages.map(m => `${m.type}: ${m.content}`).join(' | ')}` : 'This is a new conversation'}
+        ${previousMessages.length > 0 ? `Recent conversation: ${previousMessages.map((m: any) => `${m.type}: ${m.content}`).join(' | ')}` : 'This is a new conversation'}
         
         INSTRUCTIONS:
         - Provide personalized, practical financial advice specific to Nigeria
@@ -130,7 +134,8 @@ export async function POST(request: NextRequest) {
     
     // Fallback responses for different types
     let fallbackResponse;
-    switch (body.type) {
+    const { type: requestType } = await request.json();
+    switch (requestType) {
       case 'cognitive_assessment':
         fallbackResponse = {
           cognitiveScore: 5,
