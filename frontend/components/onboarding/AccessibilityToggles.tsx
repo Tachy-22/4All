@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
@@ -173,7 +173,7 @@ export function AccessibilityToggles({
   };
 
   const [toggleStates, setToggleStates] = useState<Record<string, boolean>>(getInitialToggles);
-  const { speak } = useVoice();
+  const { speak, transcript, startListening, clearTranscript } = useVoice();
   const adaptiveClasses = useAdaptiveClasses();
   const t = translations[language as keyof typeof translations] || translations.en;
 
@@ -182,14 +182,24 @@ export function AccessibilityToggles({
     toggle.relatedDisability.some(disability => disabilities.includes(disability))
   );
 
-  if (!isOpen || relevantToggles.length === 0) {
-    // If no relevant toggles, skip this step
-    if (isOpen) {
-      onComplete(toggleStates);
+  // Auto-announce when modal opens
+  useEffect(() => {
+    if (isOpen && relevantToggles.length > 0) {
+      setTimeout(() => {
+        const togglesList = relevantToggles.map(toggle => {
+          const status = toggleStates[toggle.id] ? 'enabled' : 'disabled';
+          return `${toggle.title}: ${status}. ${toggle.description}`;
+        }).join('. ');
+        
+        speak(`${t.title}. ${t.subtitle} Here are your accessibility settings: ${togglesList}. You can say the name of any setting to toggle it, or say Continue to proceed, or Skip to use defaults.`);
+        setTimeout(() => {
+          startListening();
+        }, 2000);
+      }, 1000);
     }
-    return null;
-  }
+  }, [isOpen, speak, startListening, t.title, t.subtitle, relevantToggles, toggleStates]);
 
+  // Define functions before the voice command useEffect
   const handleToggle = (toggleId: string) => {
     const newState = !toggleStates[toggleId];
     setToggleStates(prev => ({ ...prev, [toggleId]: newState }));
@@ -216,6 +226,54 @@ export function AccessibilityToggles({
     speak('Settings skipped. You can change these later in Settings.');
     onComplete(skippedToggles);
   };
+
+  // Voice command handling - moved before conditional return
+  useEffect(() => {
+    if (!transcript || !isOpen) return;
+
+    const command = transcript.toLowerCase().trim();
+    console.log('Accessibility toggles voice command:', command);
+
+    // Navigation commands
+    if (command.includes('continue') || command.includes('next') || command.includes('proceed')) {
+      handleContinue();
+      clearTranscript();
+      return;
+    }
+
+    if (command.includes('skip') || command.includes('skip for now') || command.includes('use defaults')) {
+      handleSkip();
+      clearTranscript();
+      return;
+    }
+
+    // Toggle commands - check each toggle's title for matches
+    relevantToggles.forEach(toggle => {
+      const titleWords = toggle.title.toLowerCase().split(' ');
+      const hasMatch = titleWords.some(word => command.includes(word)) || 
+                     command.includes(toggle.title.toLowerCase());
+
+      if (hasMatch) {
+        handleToggle(toggle.id);
+        clearTranscript();
+        return;
+      }
+    });
+
+    // If no matches found, provide help
+    if (transcript.length > 3) { // Avoid triggering on very short inputs
+      speak('I didn\'t understand. Try saying the name of a setting to toggle it, or say Continue or Skip.');
+      clearTranscript();
+    }
+  }, [transcript, isOpen, relevantToggles, speak, clearTranscript, handleToggle, handleContinue, handleSkip]);
+
+  if (!isOpen || relevantToggles.length === 0) {
+    // If no relevant toggles, skip this step
+    if (isOpen) {
+      onComplete(toggleStates);
+    }
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

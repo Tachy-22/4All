@@ -644,20 +644,10 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
               </div>
 
               {/* Voice Control Status */}
-              {isListening && (
-                <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-                  {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
-                    <span className="sr-only">Microphone active.</span>🎤 Say: "Voice first" or "Text only"
-                  </p> */}
-                  {transcript && (
-                    <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
-                      <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
-                    </p>
-                  )}
-                  {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
-                    Or say "Help" for more options
-                  </p> */}
-                </div>
+              {transcript && isListening && (
+                <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
+                  <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
+                </p>
               )}
 
               <div className="space-y-4">
@@ -676,9 +666,9 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                       <h3 className={cn(adaptiveClasses.text, "text-lg font-medium text-text")}>
                         {t.voice_option}
                       </h3>
-                      <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
+                      {/* <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
                         {t.voice_description}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </button>
@@ -698,9 +688,9 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                       <h3 className={cn(adaptiveClasses.text, "text-lg font-medium text-text")}>
                         {t.text_option}
                       </h3>
-                      <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
+                      {/* <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
                         {t.text_description}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </button>

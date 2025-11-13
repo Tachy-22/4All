@@ -93,11 +93,11 @@ const translations = {
   }
 };
 
-export function DisabilityDisclosureModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  language = 'en' 
+export function DisabilityDisclosureModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  language = 'en'
 }: DisabilityDisclosureModalProps) {
   const [selectedOption, setSelectedOption] = useState<'no' | 'yes' | 'prefer_not_to_say' | null>(null);
   const [selectedDisabilities, setSelectedDisabilities] = useState<DisabilityType[]>([]);
@@ -107,12 +107,12 @@ export function DisabilityDisclosureModal({
   const adaptiveClasses = useAdaptiveClasses();
   const t = translations[language as keyof typeof translations] || translations.en;
 
- const handleOptionSelect = (option: 'no' | 'yes' | 'prefer_not_to_say') => {
+  const handleOptionSelect = (option: 'no' | 'yes' | 'prefer_not_to_say') => {
     setSelectedOption(option);
-    
+
     if (option === 'yes') {
       setShowDetails(true);
-      speak('Please select the areas where you need assistance.');
+     // speak('Please select the areas where you need assistance. You can say: Vision for sight difficulties, Hearing for sound difficulties, Movement for touch difficulties, Focus for concentration difficulties, or Speech for communication difficulties. You can also say multiple options or none to finish.');
     } else {
       setShowDetails(false);
       setSelectedDisabilities([]);
@@ -123,19 +123,19 @@ export function DisabilityDisclosureModal({
       }
     }
   };
-   const handleSubmit = () => {
+  const handleSubmit = () => {
     const skipAssistance = selectedOption === 'prefer_not_to_say';
     speak('Preferences saved. Moving to next step.');
     onSubmit(selectedDisabilities, skipAssistance);
   };
 
-const handleDisabilityToggle = (disabilityId: DisabilityType) => {
+  const handleDisabilityToggle = (disabilityId: DisabilityType) => {
     const newDisabilities = selectedDisabilities.includes(disabilityId)
       ? selectedDisabilities.filter(id => id !== disabilityId)
       : [...selectedDisabilities, disabilityId];
-    
+
     setSelectedDisabilities(newDisabilities);
-    
+
     const option = disabilityOptions.find(opt => opt.id === disabilityId);
     if (option) {
       const action = newDisabilities.includes(disabilityId) ? 'selected' : 'deselected';
@@ -159,6 +159,10 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
       if (command.includes('yes') || command.includes('need assistance') || command.includes('need help')) {
         handleOptionSelect('yes');
         clearTranscript();
+        // Give detailed voice guidance after a brief delay
+        setTimeout(() => {
+          speak('Here are the available assistance areas: Say "Vision" if you need help with seeing or reading text. Say "Hearing" if you need help with sounds or prefer captions. Say "Movement" if you need larger buttons or have difficulty with precise touch. Say "Focus" if you need simplified screens or help with concentration. Say "Speech" if you prefer text over voice. You can select multiple areas or say "none" when finished.');
+        }, 2000);
         return;
       }
 
@@ -261,12 +265,12 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
 
   if (!isOpen) return null;
 
- 
 
-  
- 
 
-  const canContinue = selectedOption !== null && 
+
+
+
+  const canContinue = selectedOption !== null &&
     (selectedOption !== 'yes' || selectedDisabilities.length > 0 || showDetails);
 
   return (
@@ -274,20 +278,10 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <div className="p-6 space-y-6">
           {/* Voice Control Status */}
-          {isListening && (
-            <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-              {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
-                <span className="sr-only">Microphone active.</span>🎤 Say: "Yes", "No", or "Prefer not to say"
-              </p> */}
-              {transcript && (
-                <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
-                  <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
-                </p>
-              )}
-              {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
-                Or say "Help" for available commands
-              </p> */}
-            </div>
+          {transcript && isListening && (
+            <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
+              <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
+            </p>
           )}
 
           {/* Header */}
@@ -303,8 +297,8 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
                 {t.disclaimer}
               </p>
             </div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={onClose}
               className="shrink-0 hover:bg-gray-100"
@@ -321,8 +315,8 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
               className={cn(
                 "w-full p-4 rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
-                selectedOption === 'no' 
-                  ? 'border-primary bg-primary/5' 
+                selectedOption === 'no'
+                  ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
               )}
             >
@@ -345,8 +339,8 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
               className={cn(
                 "w-full p-4 rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
-                selectedOption === 'yes' 
-                  ? 'border-primary bg-primary/5' 
+                selectedOption === 'yes'
+                  ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
               )}
             >
@@ -369,8 +363,8 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
               className={cn(
                 "w-full p-4 rounded-lg border-2 text-left transition-all",
                 adaptiveClasses.button,
-                selectedOption === 'prefer_not_to_say' 
-                  ? 'border-primary bg-primary/5' 
+                selectedOption === 'prefer_not_to_say'
+                  ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
               )}
             >
@@ -394,12 +388,12 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
               <h3 className={cn(adaptiveClasses.text, "font-medium text-text")}>
                 Select areas where you need assistance:
               </h3>
-              
+
               <div className="grid gap-3">
                 {disabilityOptions.map((option) => {
                   const Icon = option.icon;
                   const isSelected = selectedDisabilities.includes(option.id);
-                  
+
                   return (
                     <div key={option.id} className="space-y-2">
                       <button
@@ -407,8 +401,8 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
                         className={cn(
                           "w-full p-4 rounded-lg border-2 text-left transition-all",
                           adaptiveClasses.button,
-                          isSelected 
-                            ? 'border-primary bg-primary/5' 
+                          isSelected
+                            ? 'border-primary bg-primary/5'
                             : 'border-gray-200 hover:border-gray-300 bg-white'
                         )}
                       >
@@ -419,7 +413,7 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
                           )}>
                             {isSelected && <Check className="h-4 w-4 text-white" />}
                           </div>
-                          
+
                           <div className="flex-1 space-y-1">
                             <div className="flex items-center gap-2">
                               <Icon className="h-5 w-5 text-gray-600" />
@@ -433,7 +427,7 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
                           </div>
                         </div>
                       </button>
-                      
+
                       {isSelected && (
                         <div className="ml-9 p-3 bg-blue-50 rounded-md">
                           <p className={cn(adaptiveClasses.text, "text-sm font-medium text-blue-800 mb-1")}>
@@ -456,23 +450,23 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
           {/* Voice Help */}
           <div className="text-center border-t pt-4">
             <p className={cn(adaptiveClasses.text, "text-xs text-muted-gray")}>
-              💡 You can use voice commands: {!selectedOption ? '"Yes", "No", or "Prefer not to say"' : 
-              showDetails ? '"Vision", "Hearing", "Movement", "Focus", "Speech", or "Continue"' :
-              '"Continue" or "Back"'} | Say "Help" for assistance
+              💡 You can use voice commands: {!selectedOption ? '"Yes", "No", or "Prefer not to say"' :
+                showDetails ? '"Vision", "Hearing", "Movement", "Focus", "Speech", or "Continue"' :
+                  '"Continue" or "Back"'} | Say "Help" for assistance
             </p>
           </div>
 
           {/* Footer */}
           <div className="flex gap-3 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={onClose}
               className={adaptiveClasses.button}
             >
               {t.back}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={handleSubmit}
               disabled={!canContinue}
               className={cn(adaptiveClasses.button, "flex-1")}

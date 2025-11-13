@@ -166,45 +166,83 @@ export function FinancialCoachPage() {
     }
   };
 
-  const generateCoachResponse = (userMessage: string): CoachMessage => {
-    const lowercaseMessage = userMessage.toLowerCase();
-    
-    let response = '';
-    let category: CoachMessage['category'] = 'advice';
+  const generateCoachResponse = async (userMessage: string): Promise<CoachMessage> => {
+    try {
+      // Get user profile for context
+      const userProfile = profile ? {
+        language: profile.language,
+        interactionMode: profile.interactionMode,
+        disabilities: profile.disabilities,
+        cognitiveScore: profile.cognitiveScore,
+        uiComplexity: profile.uiComplexity,
+        accessibilityPreferences: profile.accessibilityPreferences
+      } : null;
 
-    if (lowercaseMessage.includes('save') || lowercaseMessage.includes('saving')) {
-      response = uiComplexity === 'simplified' 
-        ? "Great question! Save 20% of your income. Start with ₦10,000 monthly. I can help you set this up."
-        : "Excellent! Based on your income of ₦254,800, I recommend saving ₦50,000 monthly (20% rule). This would build your emergency fund in 10 months. Would you like me to create an automated savings plan?";
-      category = 'goal';
-    } else if (lowercaseMessage.includes('spend') || lowercaseMessage.includes('budget')) {
-      response = uiComplexity === 'simplified'
-        ? "Track your spending! Use 50% for needs, 30% for wants, 20% for savings. Want me to show you how?"
-        : "Let's optimize your spending! Follow the 50/30/20 rule: 50% for needs (₦127,400), 30% for wants (₦76,440), 20% for savings (₦50,960). Your current spending is slightly off - we can fix this together.";
-      category = 'insight';
-    } else if (lowercaseMessage.includes('invest') || lowercaseMessage.includes('investment')) {
-      response = "Smart thinking! For beginners, I suggest starting with government bonds (8-12% returns) or mutual funds. Start with ₦25,000 monthly after building your emergency fund.";
-      category = 'action';
-    } else if (lowercaseMessage.includes('debt') || lowercaseMessage.includes('loan')) {
-      response = "Let's tackle debt strategically! List all debts by interest rate. Pay minimums on all, then extra on the highest rate debt. This saves you the most money long-term.";
-      category = 'action';
-    } else if (lowercaseMessage.includes('goal') || lowercaseMessage.includes('target')) {
-      response = "Goal setting is powerful! Make your goals SMART: Specific, Measurable, Achievable, Relevant, Time-bound. What's your biggest financial goal right now?";
-      category = 'goal';
-    } else {
-      response = uiComplexity === 'simplified'
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'financial_coaching',
+          prompt: userMessage,
+          context: {
+            userProfile,
+            previousMessages: messages.slice(-5), // Last 5 messages for context
+            mockData: {
+              currentBalance: 254800.50,
+              monthlyIncome: 254800,
+              recentSpending: {
+                groceries: 35000,
+                dining: 25000,
+                transport: 15000,
+                utilities: 20000
+              }
+            }
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Determine category based on content
+      let category: CoachMessage['category'] = 'advice';
+      const content = result.success ? result.data : result.fallback;
+      const lowercaseContent = content.toLowerCase();
+      
+      if (lowercaseContent.includes('goal') || lowercaseContent.includes('target') || lowercaseContent.includes('save')) {
+        category = 'goal';
+      } else if (lowercaseContent.includes('insight') || lowercaseContent.includes('tip') || lowercaseContent.includes('strategy')) {
+        category = 'insight';
+      } else if (lowercaseContent.includes('action') || lowercaseContent.includes('step') || lowercaseContent.includes('plan')) {
+        category = 'action';
+      }
+
+      return {
+        id: Date.now().toString(),
+        type: 'coach',
+        content,
+        timestamp: new Date(),
+        category
+      };
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      // Fallback response
+      const fallback = uiComplexity === 'simplified'
         ? "I can help with saving, spending, goals, and investing. What interests you most?"
         : "I'm here to help with all your financial questions! I can assist with budgeting, saving strategies, investment advice, debt management, and goal setting. What specific area would you like to explore?";
-      category = 'advice';
+      
+      return {
+        id: Date.now().toString(),
+        type: 'coach',
+        content: fallback,
+        timestamp: new Date(),
+        category: 'advice'
+      };
     }
-
-    return {
-      id: Date.now().toString(),
-      type: 'coach',
-      content: response,
-      timestamp: new Date(),
-      category
-    };
   };
 
   const handleSendMessage = async () => {
@@ -222,16 +260,20 @@ export function FinancialCoachPage() {
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
-      const coachResponse = generateCoachResponse(inputMessage);
-      setMessages(prev => [...prev, coachResponse]);
-      
-      if (interactionMode === 'voice') {
-        speak(coachResponse.content);
+    // Generate AI response
+    setTimeout(async () => {
+      try {
+        const coachResponse = await generateCoachResponse(inputMessage);
+        setMessages(prev => [...prev, coachResponse]);
+        
+        if (interactionMode === 'voice') {
+          speak(coachResponse.content);
+        }
+      } catch (error) {
+        console.error('Error generating coach response:', error);
+      } finally {
+        setIsTyping(false);
       }
-      
-      setIsTyping(false);
     }, 1500);
   };
 

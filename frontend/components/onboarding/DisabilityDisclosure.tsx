@@ -97,7 +97,7 @@ export function DisabilityDisclosure({ onNext }: DisabilityDisclosureProps) {
     // Voice feedback
     const option = disabilityOptions.find(opt => opt.id === disabilityId);
     if (option) {
-      speak(isSelected ? `${option.name} deselected` : `${option.name} selected`);
+      speak(isSelected ? `${option.name} deselected` : `${option.name} selected, you can select another, or say continue`);
     }
   };
 

@@ -276,19 +276,44 @@ export function TransactionTrackerPage() {
   };
 
   const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: currency
-    }).format(amount);
+    // Validate inputs
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return '₦0.00';
+    }
+    
+    if (!currency || typeof currency !== 'string') {
+      currency = 'NGN'; // Default to Nigerian Naira
+    }
+    
+    try {
+      return new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: currency
+      }).format(amount);
+    } catch (error) {
+      console.error('Error formatting amount:', error, 'amount:', amount, 'currency:', currency);
+      // Fallback to simple formatting
+      return `₦${amount.toLocaleString()}`;
+    }
   };
 
   const formatDate = (timestamp: number) => {
-    return new Intl.DateTimeFormat('en-NG', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(timestamp));
+    // Validate timestamp before formatting
+    if (!timestamp || isNaN(timestamp) || !isFinite(timestamp)) {
+      return 'Invalid date';
+    }
+    
+    try {
+      return new Intl.DateTimeFormat('en-NG', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(timestamp));
+    } catch (error) {
+      console.error('Error formatting date:', error, 'timestamp:', timestamp);
+      return 'Invalid date';
+    }
   };
 
   const exportTransactions = () => {
@@ -495,7 +520,7 @@ export function TransactionTrackerPage() {
                             className="text-gray-400 text-xs mt-1"
                             style={{ fontSize: adaptiveUI.fontSize.xs }}
                           >
-                            {formatDate(transaction.timestamp)} • {transaction.metadata.channel}
+                            {formatDate(transaction.timestamp)} • {transaction.metadata?.channel || 'Unknown'}
                           </p>
                         </div>
                         
@@ -587,7 +612,7 @@ export function TransactionTrackerPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500">Channel</p>
                   <p style={{ fontSize: adaptiveUI.fontSize.base }}>
-                    {selectedTransaction.metadata.channel.replace('_', ' ')}
+                    {selectedTransaction.metadata?.channel?.replace('_', ' ') || 'Unknown'}
                   </p>
                 </div>
               </div>

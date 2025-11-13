@@ -96,11 +96,11 @@ const translations = {
   }
 };
 
-export function NeurodivergentQuiz({ 
-  isOpen, 
-  onClose, 
-  onComplete, 
-  language = 'en' 
+export function NeurodivergentQuiz({
+  isOpen,
+  onClose,
+  onComplete,
+  language = 'en'
 }: NeurodivergentQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<QuizResponse[]>([]);
@@ -224,13 +224,17 @@ export function NeurodivergentQuiz({
       setQuestionStartTime(Date.now());
       setHesitationCount(0);
       setSelectedOption(null);
-      
+
       // Read the question aloud and start listening
       const question = questions[currentQuestion];
-      speak(`Question ${currentQuestion + 1} of ${questions.length}. ${question.question} ${question.description}`);
+      const optionsText = question.options
+        .map((option, index) => `Option ${index + 1}: ${option.text}`)
+        .join('. ');
+
+      speak(`Question ${currentQuestion + 1} of ${questions.length}. ${question.question} ${question.description} Your options are: ${optionsText}. You can say the option number or describe your preference.`);
       setTimeout(() => {
         startListening();
-      }, 3000);
+      }, 5000); // Increased delay since we're reading more content
     }
 
     return () => {
@@ -249,7 +253,13 @@ export function NeurodivergentQuiz({
     setSelectedOption(optionId);
     const option = questions[currentQuestion].options.find(opt => opt.id === optionId);
     if (option) {
-      speak(option.text);
+      speak(`${option.text}. Say continue to move to next question.`);
+      // Automatically proceed to next question after a brief delay
+      // setTimeout(() => {
+      //   handleNext();
+      //   clearTranscript();
+      //   return;
+      // }, 2000);
     }
   };
 
@@ -258,7 +268,7 @@ export function NeurodivergentQuiz({
 
     const responseTime = Date.now() - questionStartTime;
     const option = questions[currentQuestion].options.find(opt => opt.id === selectedOption);
-    
+
     if (option) {
       const response: QuizResponse = {
         questionId: questions[currentQuestion].id,
@@ -267,7 +277,7 @@ export function NeurodivergentQuiz({
         responseTime,
         hesitationCount
       };
-      
+
       setResponses(prev => [...prev, response]);
     }
 
@@ -344,11 +354,11 @@ export function NeurodivergentQuiz({
 
     } catch (error) {
       console.error('Quiz analysis error:', error);
-      
+
       // Fallback to local scoring
       const score = calculateLocalScore(finalResponses);
       const recommendations = generateLocalRecommendations(score);
-      
+
       setShowCompletion(true);
       speak('Your preferences have been saved.');
 
@@ -364,20 +374,20 @@ export function NeurodivergentQuiz({
   const calculateLocalScore = (responses: QuizResponse[]): number => {
     let totalWeight = 0;
     let maxPossibleWeight = 0;
-    
+
     responses.forEach(response => {
       totalWeight += response.weight;
       maxPossibleWeight += 5; // Max weight per question
-      
+
       // Factor in response time (longer = more support needed)
       if (response.responseTime > 10000) totalWeight += 0.5; // 10+ seconds
       if (response.responseTime > 20000) totalWeight += 0.5; // 20+ seconds
-      
+
       // Factor in hesitation (more hesitation = more support needed)
       if (response.hesitationCount > 2) totalWeight += 0.5;
       if (response.hesitationCount > 5) totalWeight += 0.5;
     });
-    
+
     // Convert to 1-10 scale (inverted - higher number = more support)
     const rawScore = (totalWeight / maxPossibleWeight) * 10;
     return Math.max(1, Math.min(10, Math.round(rawScore)));
@@ -416,8 +426,8 @@ export function NeurodivergentQuiz({
   const question = questions[currentQuestion];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl bg-white">
+    <div className="fixed inset-0 bg-white flex items-center justify-center z-50  w-screen">
+      <Card className="w-screen max-w-screen bg-white">
         <div className="p-6 space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
@@ -430,7 +440,7 @@ export function NeurodivergentQuiz({
             <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
               {t.subtitle}
             </p>
-            
+
             {/* Progress */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -476,20 +486,10 @@ export function NeurodivergentQuiz({
                 </p>
 
                 {/* Voice Control Status */}
-                {isListening && (
-                  <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-                    {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
-                      <span className="sr-only">Microphone active.</span>🎤 Say: "Option 1", "Option 2", "Option 3", "Option 4", or describe your preference
-                    </p> */}
-                    {transcript && (
-                      <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
-                        <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
-                      </p>
-                    )}
-                    {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
-                      Or say "Help" for more voice commands
-                    </p> */}
-                  </div>
+                {transcript && isListening && (
+                  <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
+                    <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
+                  </p>
                 )}
               </div>
 
