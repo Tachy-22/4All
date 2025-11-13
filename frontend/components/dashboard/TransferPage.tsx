@@ -12,12 +12,12 @@ import { useProfile, useInteractionMode } from '../../hooks/useProfile';
 import { useVoice } from '../../hooks/useVoice';
 import { useAdaptiveUI, useAdaptiveClasses } from '../../hooks/useAdaptiveUI';
 import { ZivaAssistant } from '../ziva/ZivaAssistant';
-import { 
-  ArrowLeft, 
-  Send, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Send,
+  Shield,
+  Clock,
+  CheckCircle,
   AlertCircle,
   Mic,
   VolumeX
@@ -44,13 +44,14 @@ export function TransferPage() {
     amount: '',
     recipient: '',
     recipientAccount: '',
-    fromAccount: '',
+    fromAccount: 'savings', // 👈 default account
     narration: ''
   });
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [transferResult, setTransferResult] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const router = useRouter();
   const profile = useProfile();
   const interactionMode = useInteractionMode();
@@ -60,28 +61,47 @@ export function TransferPage() {
 
   const steps: TransferStep[] = [
     { id: 'details', title: 'Transfer Details', completed: false },
-    { id: 'confirm', title: 'Confirm Transfer', completed: false },
+    { id: 'confirm', title: 'Confirm', completed: false },
     { id: 'complete', title: 'Transfer Complete', completed: false }
   ];
 
   useEffect(() => {
-    const welcomeMessage = "Welcome to money transfer. Let's help you send money quickly and securely. You can use voice commands or fill out the form.";
-    setTimeout(() => speak(welcomeMessage), 1000);
-  }, [speak]);
+    const welcomeMessage =
+      "Welcome to money transfer. Let's help you send money quickly and securely. You can use voice commands or fill out the form.";
+
+    // Speak greeting first
+    const greetAndListen = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800)); // slight delay for UX
+      speak(welcomeMessage);
+
+      // After greeting, auto-start listening if interactionMode is voice
+      if (interactionMode === 'voice') {
+        setTimeout(() => {
+          speak("Your savings account is selected by default.");
+          startListening();
+          speak("I'm listening for your transfer command...");
+        }, 5000);
+      }
+
+    };
+
+    greetAndListen();
+  }, [speak, startListening, interactionMode]);
+
 
   // Process voice commands
   useEffect(() => {
     if (transcript && transcript.trim()) {
       const command = transcript.toLowerCase();
-      
+
       // Command: "Send [amount] naira to [name]"
       const sendMatch = command.match(/send\s+(\d+)\s+naira\s+to\s+(\w+)/i);
       if (sendMatch) {
         const [, amount, recipientName] = sendMatch;
-        const foundRecipient = mockRecipients.find(r => 
+        const foundRecipient = mockRecipients.find(r =>
           r.name.toLowerCase().includes(recipientName.toLowerCase())
         );
-        
+
         if (foundRecipient) {
           setTransferData(prev => ({
             ...prev,
@@ -139,6 +159,46 @@ export function TransferPage() {
         return;
       }
 
+      // Confirmation phase voice commands
+      if (adaptiveUI.confirmMode === 'voice') {
+        const command = transcript.toLowerCase().trim();
+
+        if (command.includes('confirm')) {
+          speak('Transfer confirmed. Processing now...');
+          clearTranscript();
+          processTransfer();
+          return;
+        }
+
+        if (command.includes('cancel')) {
+          speak('Transfer cancelled. Returning to edit mode.');
+          clearTranscript();
+          handleBack();
+          return;
+        }
+      }
+
+      // Navigation: Go back to homepage or dashboard
+      if (transcript && transcript.trim()) {
+        const command = transcript.toLowerCase().trim();
+
+        if (
+          command.includes('go home') ||
+          command.includes('back to home') ||
+          command.includes('return home') ||
+          command.includes('go to dashboard') ||
+          command.includes('back to dashboard') ||
+          command.includes('home page') ||
+          command.includes('dashboard')
+        ) {
+          speak('Taking you back to your dashboard.');
+          clearTranscript();
+          router.push('/dashboard');
+          return;
+        }
+      }
+
+
       // If no command matched, provide help
       speak("I didn't understand that command. Try saying 'Send 5000 naira to Ada' or 'Set narration to rent payment'.");
       clearTranscript();
@@ -160,12 +220,12 @@ export function TransferPage() {
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (step === 0) {
       if (!transferData.amount) newErrors.amount = 'Amount is required';
       if (!transferData.recipient) newErrors.recipient = 'Recipient name is required';
       if (!transferData.fromAccount) newErrors.fromAccount = 'Source account is required';
-      
+
       const amount = parseFloat(transferData.amount);
       if (isNaN(amount) || amount <= 0) newErrors.amount = 'Enter a valid amount';
       if (amount > 1000000) newErrors.amount = 'Transfer limit exceeded';
@@ -214,7 +274,7 @@ export function TransferPage() {
 
       const result = await response.json();
       setTransferResult(result);
-      
+
       if (result.success) {
         speak(`Transfer successful! ₦${transferData.amount} has been sent to ${transferData.recipient}.`);
         setCurrentStep(2);
@@ -247,7 +307,7 @@ export function TransferPage() {
           Send Money
         </h2>
         <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
-          {interactionMode === 'voice' 
+          {interactionMode === 'voice'
             ? "Fill out the form below or use voice commands like 'Send ₦5000 to Ada'"
             : "Enter the transfer details below"
           }
@@ -264,7 +324,7 @@ export function TransferPage() {
             type="number"
             placeholder="Enter amount"
             value={transferData.amount}
-            onChange={(e) => setTransferData({...transferData, amount: e.target.value})}
+            onChange={(e) => setTransferData({ ...transferData, amount: e.target.value })}
             className={cn(adaptiveClasses.input, errors.amount && "border-danger")}
             aria-invalid={!!errors.amount}
             aria-describedby={errors.amount ? "amount-error" : undefined}
@@ -280,9 +340,9 @@ export function TransferPage() {
           <Label htmlFor="fromAccount" className={cn(adaptiveClasses.text, "font-medium")}>
             From Account *
           </Label>
-          <Select 
-            value={transferData.fromAccount} 
-            onValueChange={(value) => setTransferData({...transferData, fromAccount: value})}
+          <Select
+            value={transferData.fromAccount}
+            onValueChange={(value) => setTransferData({ ...transferData, fromAccount: value })}
           >
             <SelectTrigger className={cn(adaptiveClasses.input, errors.fromAccount && "border-danger")}>
               <SelectValue placeholder="Select account" />
@@ -306,13 +366,13 @@ export function TransferPage() {
           <Label htmlFor="recipient" className={cn(adaptiveClasses.text, "font-medium")}>
             Choose Recipient *
           </Label>
-          <Select 
+          <Select
             value={mockRecipients.find(r => r.name === transferData.recipient)?.id || ""}
             onValueChange={(value) => {
               const selectedRecipient = mockRecipients.find(r => r.id === value);
               if (selectedRecipient) {
                 setTransferData({
-                  ...transferData, 
+                  ...transferData,
                   recipient: selectedRecipient.name,
                   recipientAccount: selectedRecipient.accountNumber
                 });
@@ -349,7 +409,7 @@ export function TransferPage() {
             id="narration"
             placeholder="What is this transfer for?"
             value={transferData.narration}
-            onChange={(e) => setTransferData({...transferData, narration: e.target.value})}
+            onChange={(e) => setTransferData({ ...transferData, narration: e.target.value })}
             className={adaptiveClasses.input}
           />
         </div>
@@ -383,8 +443,8 @@ export function TransferPage() {
               }}
               className={cn(
                 "border-primary-red",
-                isListening 
-                  ? "bg-primary-red text-white animate-pulse" 
+                isListening
+                  ? "bg-primary-red text-white animate-pulse"
                   : "text-primary-red hover:bg-primary-red/10"
               )}
             >
@@ -423,7 +483,7 @@ export function TransferPage() {
               Previous
             </Button>
           )}
-          
+
           <Button
             onClick={handleNext}
             className={cn(
@@ -469,7 +529,7 @@ export function TransferPage() {
               {formatCurrency(parseFloat(transferData.amount))}
             </span>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <span className={cn(adaptiveClasses.text, "text-muted-gray")}>To</span>
             <div className="text-right">
@@ -509,7 +569,7 @@ export function TransferPage() {
         >
           Back to Edit
         </Button>
-        
+
         <Button
           onClick={handleConfirm}
           disabled={isProcessing}
@@ -567,14 +627,14 @@ export function TransferPage() {
       )}
 
       <div className="flex gap-4 justify-center">
-        <Button
+        {/* <Button
           variant="outline"
           onClick={() => router.push('/dashboard')}
           className={adaptiveClasses.button}
         >
           Back to Dashboard
-        </Button>
-        
+        </Button> */}
+
         {!transferResult?.success && (
           <Button
             onClick={() => {
@@ -613,7 +673,7 @@ export function TransferPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          
+
           <div>
             <h1 className={cn(adaptiveClasses.heading, "text-primary-red")}>
               Money Transfer

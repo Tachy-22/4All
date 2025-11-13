@@ -385,9 +385,9 @@ export function LandingPage() {
 
               {isListening && (
                 <div className="bg-blue-50 rounded-lg p-3 max-w-md mx-auto" role="status" aria-live="polite" id="voice-status">
-                  <p className="text-sm text-blue-800 text-center">
+                  {/* <p className="text-sm text-blue-800 text-center">
                     <span className="sr-only">Microphone active.</span>🎤 Say: "English", "Pidgin", "Yoruba", "Igbo", or "Hausa"
-                  </p>
+                  </p> */}
                   {transcript && (
                     <p className="text-sm text-blue-600 mt-1 text-center" aria-live="assertive">
                       <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
@@ -544,9 +544,9 @@ export function LandingPage() {
 
                 {isListening && (
                   <div className="bg-blue-50 rounded-lg p-3 max-w-md mx-auto" role="status" aria-live="polite" id="main-voice-status">
-                    <p className="text-sm text-blue-800 text-center">
+                    {/* <p className="text-sm text-blue-800 text-center">
                       <span className="sr-only">Microphone active.</span>🎤 Say: "Start", "Demo", "Features", or "Change language"
-                    </p>
+                    </p> */}
                     {transcript && (
                       <p className="text-sm text-blue-600 mt-1 text-center" aria-live="assertive">
                         <span className="sr-only">Voice input detected:</span>You said: "{transcript}"

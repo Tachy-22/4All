@@ -323,7 +323,7 @@ export function NeurodivergentQuiz({
         })
       });
 
-      const aiResult = await response.json();
+      const aiResult = await analysisResponse.json();
       let score, recommendations;
 
       if (aiResult.success && aiResult.data.cognitiveScore) {
@@ -478,17 +478,17 @@ export function NeurodivergentQuiz({
                 {/* Voice Control Status */}
                 {isListening && (
                   <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-                    <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
+                    {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
                       <span className="sr-only">Microphone active.</span>🎤 Say: "Option 1", "Option 2", "Option 3", "Option 4", or describe your preference
-                    </p>
+                    </p> */}
                     {transcript && (
                       <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
                         <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
                       </p>
                     )}
-                    <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
+                    {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
                       Or say "Help" for more voice commands
-                    </p>
+                    </p> */}
                   </div>
                 )}
               </div>
@@ -501,7 +501,7 @@ export function NeurodivergentQuiz({
                     onMouseEnter={handleOptionHover}
                     className={cn(
                       "w-full p-4 rounded-lg border-2 text-left transition-all",
-                      adaptiveClasses.touchTarget,
+                      adaptiveClasses.button,
                       selectedOption === option.id
                         ? 'border-primary bg-primary/5'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -543,7 +543,7 @@ export function NeurodivergentQuiz({
               <Button
                 variant="outline"
                 onClick={currentQuestion > 0 ? handleBack : onClose}
-                className={adaptiveClasses.touchTarget}
+                className={adaptiveClasses.button}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 {t.back}
@@ -552,7 +552,7 @@ export function NeurodivergentQuiz({
               <Button
                 onClick={handleNext}
                 disabled={!selectedOption}
-                className={cn(adaptiveClasses.touchTarget, "flex-1")}
+                className={cn(adaptiveClasses.button, "flex-1")}
               >
                 {currentQuestion === questions.length - 1 ? t.finish : t.continue}
                 <ChevronRight className="h-4 w-4 ml-1" />

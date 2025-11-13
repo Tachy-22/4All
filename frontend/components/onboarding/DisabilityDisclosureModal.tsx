@@ -276,17 +276,17 @@ const handleDisabilityToggle = (disabilityId: DisabilityType) => {
           {/* Voice Control Status */}
           {isListening && (
             <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-              <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
+              {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
                 <span className="sr-only">Microphone active.</span>🎤 Say: "Yes", "No", or "Prefer not to say"
-              </p>
+              </p> */}
               {transcript && (
                 <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
                   <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
                 </p>
               )}
-              <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
+              {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
                 Or say "Help" for available commands
-              </p>
+              </p> */}
             </div>
           )}
 

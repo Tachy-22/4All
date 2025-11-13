@@ -77,7 +77,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   const { speak, isListening, startListening, stopListening, transcript, clearTranscript } = useVoice();
   const adaptiveClasses = useAdaptiveClasses();
   const { updateProfile } = useProfileStore();
-  
+
   const {
     progress,
     startOnboarding,
@@ -102,13 +102,13 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   const getCurrentStepName = () => {
     if (!progress) return skipLanguageSelection ? 'interaction_mode' : 'language';
     const stepId = progress.steps[progress.currentStep]?.id || 'language';
-    
+
     // If we're skipping language selection and we're on the language step, 
     // treat it as interaction_mode step
     if (skipLanguageSelection && stepId === 'language') {
       return 'interaction_mode';
     }
-    
+
     return stepId;
   };
 
@@ -141,14 +141,14 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
     if (transcript && transcript.trim()) {
       const command = transcript.toLowerCase();
       const currentStepName = getCurrentStepName();
-      
+
       console.log('Voice command debug:', {
         transcript: transcript,
         command: command,
         currentStep: currentStepName,
         isInteractionMode: currentStepName === 'interaction_mode'
       });
-      
+
       // Language selection commands (if not skipped)
       if (currentStepName === 'language' && !skipLanguageSelection) {
         const languageCommands = [
@@ -174,10 +174,25 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
         }
       }
 
+      if (command.includes('voice') || command.includes('voice first') || command.includes('speak') || command.includes('talk')) {
+        console.log('Voice command matched, calling handleInteractionModeSelect("voice")');
+        handleInteractionModeSelect('voice');
+        clearTranscript();
+        return;
+      }
+
+      if (command.includes('text') || command.includes('text only') || command.includes('typing') || command.includes('keyboard')) {
+        console.log('Text command matched, calling handleInteractionModeSelect("text")');
+        handleInteractionModeSelect('text');
+        clearTranscript();
+        return;
+      }
+
+
       // Interaction mode selection commands
-      if (currentStepName === 'interaction_mode') {
+      if (currentStepName === 'disability_disclosure') {
         console.log('Processing interaction mode command:', command);
-        
+
         if (command.includes('voice') || command.includes('voice first') || command.includes('speak') || command.includes('talk')) {
           console.log('Voice command matched, calling handleInteractionModeSelect("voice")');
           handleInteractionModeSelect('voice');
@@ -233,7 +248,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   // Auto-announce options when step loads and auto-start listening
   useEffect(() => {
     const currentStepName = getCurrentStepName();
-    
+
     if (currentStepName === 'language' && !skipWelcome && !skipLanguageSelection) {
       setTimeout(() => {
         speak('Welcome to 4All Banking! Please select your language. You can click on a language or say its name. Available languages are: English, Pidgin, Yoruba, Igbo, and Hausa.');
@@ -242,14 +257,14 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
         }, 3000);
       }, 1000);
     }
-    
+
     if (currentStepName === 'interaction_mode' || (currentStepName === 'language' && skipLanguageSelection)) {
       setTimeout(() => {
         // Auto-start listening for interaction mode
         startListening();
       }, 1000);
     }
-  }, [getCurrentStepName(),  speak, skipWelcome, startListening, skipLanguageSelection]);
+  }, [getCurrentStepName(), speak, skipWelcome, startListening, skipLanguageSelection]);
 
   // Debug voice support
   useEffect(() => {
@@ -280,7 +295,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       speak('Please select a language first.');
       return;
     }
-    
+
     nextStep();
     speak('Moving to interaction preferences.');
   };
@@ -288,7 +303,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   // Toggle voice listening for language selection
   const toggleLanguageListening = () => {
     console.log('Toggle voice listening clicked. Currently listening:', isListening);
-    
+
     if (isListening) {
       stopListening();
       speak('Voice recognition stopped.');
@@ -300,7 +315,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   };
 
   // Check if speech recognition is supported
-  const isSpeechSupported = typeof window !== 'undefined' && 
+  const isSpeechSupported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
   // Interaction mode selection
@@ -311,16 +326,16 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       stepId: progress?.steps[progress?.currentStep]?.id,
       totalSteps: progress?.steps.length
     });
-    
+
     updateInteractionMode(mode);
     updateStep('interaction_mode', { interactionMode: mode });
-    
+
     if (mode === 'voice') {
       speak('Voice interaction enabled. You can always switch to text later.');
     } else {
       speak('Text interaction selected. You can change this in settings later.');
     }
-    
+
     // Move to disability disclosure
     setTimeout(() => {
       console.log('About to advance to disability disclosure step');
@@ -328,7 +343,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
         currentStep: progress?.currentStep,
         stepId: progress?.steps[progress?.currentStep]?.id
       });
-      
+
       setShowDisabilityModal(true);
       // Only call nextStep once - this will move to the disability_disclosure step
       nextStep();
@@ -340,10 +355,10 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
     setShowDisabilityModal(false);
     updateDisabilities(disabilities);
     updateStep('disability_disclosure', { disabilities, skipAssistance });
-    
+
     // If cognitive difficulty is selected or we need a quiz, show it
     const needsQuiz = disabilities.includes('cognitive') || (!skipAssistance && disabilities.length > 0);
-    
+
     if (needsQuiz && !skipAssistance) {
       setTimeout(() => {
         setShowQuizModal(true);
@@ -364,7 +379,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
     setShowQuizModal(false);
     updateCognitiveScore(score);
     updateStep('cognitive_quiz', { score, responses, recommendations });
-    
+
     // Move to accessibility toggles
     setTimeout(() => {
       setShowTogglesModal(true);
@@ -377,7 +392,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
     setShowTogglesModal(false);
     updateAccessibilityToggles(toggles);
     updateStep('accessibility_toggles', { toggles });
-    
+
     // Complete onboarding
     handleCompleteOnboarding();
   };
@@ -386,13 +401,13 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   const handleCompleteOnboarding = async () => {
     try {
       const finalProfile = await completeOnboarding();
-      
+
       if (finalProfile) {
         // Save to profile store
         updateProfile(finalProfile as Partial<UserProfile>);
-        
+
         speak('Setup complete! Welcome to your personalized banking experience.');
-        
+
         // Call the parent's onComplete callback if provided
         if (onComplete) {
           onComplete();
@@ -490,7 +505,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                 </Button>
               </div>
             </div>
-            
+
             {progress && (
               <div className="space-y-2">
                 <Progress value={stepProgress} className="w-full h-3" />
@@ -509,7 +524,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
                 <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
                   {t.language_subtitle}
                 </p>
-                
+
                 {/* Voice Control */}
                 <div className="space-y-3">
                   <div className="flex justify-center gap-3">
@@ -551,9 +566,9 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
 
                 {(isListening || transcript) && (
                   <div className="bg-blue-50 rounded-lg p-3">
-                    <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
+                    {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
                       🎤 Say: "English", "Pidgin", "Yoruba", "Igbo", or "Hausa"
-                    </p>
+                    </p> */}
                     {transcript && (
                       <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")}>
                         You said: "{transcript}"
@@ -617,7 +632,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
           )}
 
           {/* Interaction Mode Selection Step - Show if current step is interaction_mode OR if we skipped language and step is language */}
-          {( currentStep === 'disability_disclosure'  || currentStep === 'interaction_mode' || (currentStep === 'language' && skipLanguageSelection)) && (
+          {(currentStep === 'disability_disclosure' || currentStep === 'interaction_mode' || (currentStep === 'language' && skipLanguageSelection)) && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <h2 className={cn(adaptiveClasses.heading, "text-xl font-semibold text-text")}>
@@ -631,17 +646,17 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
               {/* Voice Control Status */}
               {isListening && (
                 <div className="bg-blue-50 rounded-lg p-3 text-center" role="status" aria-live="polite">
-                  <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
+                  {/* <p className={cn(adaptiveClasses.text, "text-sm text-blue-800")}>
                     <span className="sr-only">Microphone active.</span>🎤 Say: "Voice first" or "Text only"
-                  </p>
+                  </p> */}
                   {transcript && (
                     <p className={cn(adaptiveClasses.text, "text-sm text-blue-600 mt-1")} aria-live="assertive">
                       <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
                     </p>
                   )}
-                  <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
+                  {/* <p className={cn(adaptiveClasses.text, "text-xs text-blue-700 mt-2")}>
                     Or say "Help" for more options
-                  </p>
+                  </p> */}
                 </div>
               )}
 
@@ -692,11 +707,11 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
               </div>
 
               {/* Voice Help for Interaction Mode */}
-              <div className="text-center">
+              {/* <div className="text-center">
                 <p className={cn(adaptiveClasses.text, "text-xs text-muted-gray")}>
                   💡 You can click on an option or say "Voice first" or "Text only"
                 </p>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -710,7 +725,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
               <p className={cn(adaptiveClasses.text, "text-muted-gray")}>
                 {t.welcome_message}
               </p>
-              
+
               <Button
                 onClick={handleCompleteOnboarding}
                 size="lg"
