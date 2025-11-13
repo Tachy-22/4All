@@ -3,7 +3,13 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/database.js";
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import routes
 import profileRoutes from "./routes/profileRoutes.js";
@@ -12,6 +18,7 @@ import billsRoutes from "./routes/billsRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import zivaRoutes from "./routes/zivaRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import promotionsRoutes from "./routes/promotionsRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +34,34 @@ connectDB();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com",
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdnjs.cloudflare.com",
+          "https://fonts.googleapis.com",
+        ],
+        fontSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "https://fonts.gstatic.com",
+        ],
+        connectSrc: [
+          "'self'",
+          "https://fonts.googleapis.com",
+          "https://fonts.gstatic.com",
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
   })
 );
 
@@ -40,6 +75,9 @@ app.use(
 app.use(morgan("combined"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Serve static files for admin dashboard
+app.use("/admin", express.static(path.join(__dirname, "../public/admin")));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -64,6 +102,7 @@ app.use("/api/bills", billsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ziva", zivaRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/promotions", promotionsRoutes);
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -132,6 +171,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`📡 API URL: http://localhost:${PORT}`);
+  console.log(`🎨 Admin Dashboard: http://localhost:${PORT}/admin`);
   console.log(
     `🔗 CORS Origin: ${process.env.CORS_ORIGIN || "http://localhost:3000"}`
   );

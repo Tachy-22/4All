@@ -1,5 +1,5 @@
-import User from '../models/User.js';
-import geminiService from '../services/geminiService.js';
+import User from "../models/User.js";
+import geminiService from "../services/geminiService.js";
 
 /**
  * POST /api/profile/detect
@@ -7,13 +7,19 @@ import geminiService from '../services/geminiService.js';
  */
 export const detectProfile = async (req, res) => {
   try {
-    const { language, disabilities, cognitiveScore, interactionMode, microInteractions } = req.body;
+    const {
+      language,
+      disabilities,
+      cognitiveScore,
+      interactionMode,
+      microInteractions,
+    } = req.body;
 
     // Validate required fields
     if (!language) {
-      return res.status(400).json({ 
-        error: 'Language is required',
-        details: 'Please provide a language preference' 
+      return res.status(400).json({
+        error: "Language is required",
+        details: "Please provide a language preference",
       });
     }
 
@@ -22,15 +28,17 @@ export const detectProfile = async (req, res) => {
       language,
       disabilities: disabilities || [],
       cognitiveScore: cognitiveScore || 5,
-      interactionMode: interactionMode || 'voice',
-      microInteractions
+      interactionMode: interactionMode || "voice",
+      microInteractions,
     });
 
     // Build complete profile response
     const profile = {
       profileId: `p_${Date.now()}`,
       language,
-      interactionMode: microInteractions?.preferVoice ? 'voice' : (interactionMode || 'text'),
+      interactionMode: microInteractions?.preferVoice
+        ? "voice"
+        : interactionMode || "text",
       disabilities: disabilities || [],
       cognitiveScore: cognitiveScore || 5,
       uiComplexity: aiRecommendations.uiComplexity,
@@ -40,23 +48,26 @@ export const detectProfile = async (req, res) => {
         ttsSpeed: aiRecommendations.ttsSpeed,
         largeTargets: aiRecommendations.largeTargets,
         captions: aiRecommendations.captions,
-        font: 'inter'
+        font: "inter",
       },
       confirmMode: aiRecommendations.confirmMode,
-      isOnboardingComplete: false
+      isOnboardingComplete: false,
     };
 
     // Optionally include AI reasoning in development mode
-    if (process.env.NODE_ENV === 'development' && aiRecommendations.aiReasoning) {
+    if (
+      process.env.NODE_ENV === "development" &&
+      aiRecommendations.aiReasoning
+    ) {
       profile._aiReasoning = aiRecommendations.aiReasoning;
     }
 
     res.json(profile);
   } catch (error) {
-    console.error('Profile detection error:', error);
-    res.status(500).json({ 
-      error: 'Profile detection failed',
-      details: error.message 
+    console.error("Profile detection error:", error);
+    res.status(500).json({
+      error: "Profile detection failed",
+      details: error.message,
     });
   }
 };
@@ -71,8 +82,8 @@ export const saveProfile = async (req, res) => {
 
     // Validate required fields
     if (!profileData.profileId) {
-      return res.status(400).json({ 
-        error: 'Profile ID is required' 
+      return res.status(400).json({
+        error: "Profile ID is required",
       });
     }
 
@@ -80,23 +91,48 @@ export const saveProfile = async (req, res) => {
     const profile = await User.findOneAndUpdate(
       { profileId: profileData.profileId },
       profileData,
-      { 
-        upsert: true, 
+      {
+        upsert: true,
         new: true,
-        runValidators: true 
+        runValidators: true,
       }
     );
 
     res.json({
       success: true,
       profileId: profile.profileId,
-      message: 'Profile saved successfully'
+      message: "Profile saved successfully",
     });
   } catch (error) {
-    console.error('Profile save error:', error);
-    res.status(500).json({ 
-      error: 'Failed to save profile',
-      details: error.message 
+    console.error("Profile save error:", error);
+    res.status(500).json({
+      error: "Failed to save profile",
+      details: error.message,
+    });
+  }
+};
+
+/**
+ * GET /api/profile
+ * Get all user profiles (for admin dashboard)
+ */
+export const getAllProfiles = async (req, res) => {
+  try {
+    const { limit = 100, skip = 0 } = req.query;
+
+    const profiles = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(skip));
+
+    const total = await User.countDocuments();
+
+    res.json(profiles);
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    res.status(500).json({
+      error: "Failed to fetch profiles",
+      details: error.message,
     });
   }
 };
@@ -112,9 +148,9 @@ export const getProfile = async (req, res) => {
     const profile = await User.findOne({ profileId }).lean();
 
     if (!profile) {
-      return res.status(404).json({ 
-        error: 'Profile not found',
-        details: `No profile found with ID: ${profileId}` 
+      return res.status(404).json({
+        error: "Profile not found",
+        details: `No profile found with ID: ${profileId}`,
       });
     }
 
@@ -124,10 +160,10 @@ export const getProfile = async (req, res) => {
 
     res.json(profile);
   } catch (error) {
-    console.error('Profile fetch error:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch profile',
-      details: error.message 
+    console.error("Profile fetch error:", error);
+    res.status(500).json({
+      error: "Failed to fetch profile",
+      details: error.message,
     });
   }
 };
@@ -147,15 +183,15 @@ export const updateProfile = async (req, res) => {
     const profile = await User.findOneAndUpdate(
       { profileId },
       { $set: updates },
-      { 
+      {
         new: true,
-        runValidators: true 
+        runValidators: true,
       }
     ).lean();
 
     if (!profile) {
-      return res.status(404).json({ 
-        error: 'Profile not found' 
+      return res.status(404).json({
+        error: "Profile not found",
       });
     }
 
@@ -166,14 +202,13 @@ export const updateProfile = async (req, res) => {
     res.json({
       success: true,
       profile,
-      message: 'Profile updated successfully'
+      message: "Profile updated successfully",
     });
   } catch (error) {
-    console.error('Profile update error:', error);
-    res.status(500).json({ 
-      error: 'Failed to update profile',
-      details: error.message 
+    console.error("Profile update error:", error);
+    res.status(500).json({
+      error: "Failed to update profile",
+      details: error.message,
     });
   }
 };
-
