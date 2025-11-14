@@ -5,9 +5,10 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { useVoice } from '../../hooks/useVoice';
-import { useAdaptiveClasses } from '../../hooks/useAdaptiveUI';
+import { useAdaptiveClasses, useAdaptiveUI } from '../../hooks/useAdaptiveUI';
 import { ChevronRight, ChevronLeft, Brain, Clock, CheckCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import Image from 'next/image';
 
 interface QuizQuestion {
   id: string;
@@ -64,9 +65,9 @@ const questions: QuizQuestion[] = [
     description: 'This helps us show you the right number of options at once',
     options: [
       { id: 'few_options', text: 'Just a few clear choices (2-3 options)', weight: 5 },
-      { id: 'some_options', text: 'Some options but not overwhelming (4-6 options)', weight: 3 },
-      { id: 'many_options', text: 'Many options so I can compare (7+ options)', weight: 1 },
-      { id: 'categories', text: 'Lots of options organized in groups/categories', weight: 2 }
+      { id: 'some_options', text: 'Some options (4-6 options)', weight: 3 },
+      { id: 'many_options', text: 'Many options  (7+ options)', weight: 1 },
+      { id: 'categories', text: 'Lots of options in groups', weight: 2 }
     ]
   }
 ];
@@ -112,6 +113,7 @@ export function NeurodivergentQuiz({
 
   const { speak, startListening, stopListening, transcript, clearTranscript, isListening } = useVoice();
   const adaptiveClasses = useAdaptiveClasses();
+  const adaptiveUI = useAdaptiveUI();
   const t = translations[language as keyof typeof translations] || translations.en;
 
   // Voice command processing
@@ -346,7 +348,7 @@ export function NeurodivergentQuiz({
       }
 
       setShowCompletion(true);
-      speak('Analysis complete! Your interface has been personalized.');
+      speak('Analysis complete! Your interface has been personalized. Wait a minute, setting up your dashboard !');
 
       setTimeout(() => {
         onComplete(score, finalResponses, recommendations);
@@ -426,11 +428,22 @@ export function NeurodivergentQuiz({
   const question = questions[currentQuestion];
 
   return (
-    <div className="fixed inset-0 bg-white flex items-center justify-center z-50  w-screen">
+    <div className="fixed inset-0 bg-white flex items-center justify-center z-50 flex-col overflow-y-auto  w-screen">
+
       <Card className="w-screen max-w-screen bg-white">
-        <div className="p-6 space-y-6">
+
+        <div className={cn(adaptiveClasses.card, adaptiveClasses.container)}>
           {/* Header */}
-          <div className="text-center space-y-2">
+          <div className="flex justify-center mb-6 max-h-[8rem]">
+            <Image
+              src="/logo.png"
+              alt="4All Banking Logo"
+              width={1000}
+              height={1000}
+              className="rounded-xl w-[15rem] h-full object-contain"
+            />
+          </div>
+          <div className={cn("text-center", adaptiveClasses.container)}>
             <div className="flex items-center justify-center gap-2 mb-4">
               <Brain className="h-8 w-8 text-primary" />
               <h2 className={cn(adaptiveClasses.heading, "text-2xl font-semibold text-text")}>
@@ -442,8 +455,8 @@ export function NeurodivergentQuiz({
             </p>
 
             {/* Progress */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
+            <div className={adaptiveClasses.container}>
+              <div className="flex items-center justify-between">
                 <span className={cn(adaptiveClasses.text, "text-muted-gray")}>
                   {t.progress_label
                     .replace('{current}', (currentQuestion + 1).toString())
@@ -451,21 +464,24 @@ export function NeurodivergentQuiz({
                 </span>
                 <Clock className="h-4 w-4 text-muted-gray" />
               </div>
-              <Progress value={progress} className="w-full h-2" />
+              <Progress value={progress} className={cn("w-full", adaptiveClasses.container === 'space-y-6' ? "h-3" : "h-2")} />
             </div>
           </div>
 
           {isAnalyzing ? (
             /* Analysis State */
-            <div className="text-center space-y-4 py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+            <div className={cn("text-center py-8", adaptiveClasses.container)}>
+              <div className={cn(
+                "h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto",
+                adaptiveUI.animationEnabled ? "animate-spin" : ""
+              )} />
               <p className={cn(adaptiveClasses.text, "text-text")}>
                 {t.analyzing}
               </p>
             </div>
           ) : showCompletion ? (
             /* Completion State */
-            <div className="text-center space-y-4 py-8">
+            <div className={cn("text-center py-8", adaptiveClasses.container)}>
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
               <h3 className={cn(adaptiveClasses.heading, "text-xl font-semibold text-text")}>
                 {t.complete_title}
@@ -476,8 +492,8 @@ export function NeurodivergentQuiz({
             </div>
           ) : (
             /* Quiz Questions */
-            <div className="space-y-6">
-              <div className="space-y-3">
+            <div className={adaptiveClasses.container}>
+              <div className={adaptiveClasses.container}>
                 <h3 className={cn(adaptiveClasses.text, "text-lg font-medium text-text")}>
                   {question.question}
                 </h3>
@@ -493,26 +509,26 @@ export function NeurodivergentQuiz({
                 )}
               </div>
 
-              <div className="space-y-3">
+              <div className={adaptiveClasses.container}>
                 {question.options.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleOptionSelect(option.id)}
                     onMouseEnter={handleOptionHover}
                     className={cn(
-                      "w-full p-4 rounded-lg border-2 text-left transition-all",
+                      "w-full text-left transition-all border rounded-xl",
                       adaptiveClasses.button,
                       selectedOption === option.id
-                        ? 'border-primary bg-primary/5'
+                        ? 'border-primary bg-primary/5 border-2'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     )}
                   >
                     <div className="flex items-start gap-3">
                       <div className={cn(
-                        "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5",
+                        "rounded-full flex items-center justify-center shrink-0 mt-0.5",
                         selectedOption === option.id
-                          ? 'border-primary bg-primary'
-                          : 'border-gray-300'
+                          ? 'border-primary bg-primary w-6 h-6 border-2'
+                          : 'border-gray-300 w-6 h-6 border-2'
                       )}>
                         {selectedOption === option.id && (
                           <div className="w-3 h-3 rounded-full bg-white" />
@@ -539,7 +555,7 @@ export function NeurodivergentQuiz({
 
           {/* Footer */}
           {!isAnalyzing && !showCompletion && (
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-4">
               <Button
                 variant="outline"
                 onClick={currentQuestion > 0 ? handleBack : onClose}

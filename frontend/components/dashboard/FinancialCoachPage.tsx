@@ -27,9 +27,11 @@ import {
   Clock,
   Star,
   BookOpen,
-  MessageCircle
+  MessageCircle,
+  Mic
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { Textarea } from '../ui/textarea';
 
 interface CoachMessage {
   id: string;
@@ -127,7 +129,7 @@ export function FinancialCoachPage() {
   const profile = useProfile();
   const interactionMode = useInteractionMode();
   const uiComplexity = useUIComplexity();
-  const { speak } = useVoice();
+  const { speak, startListening, stopListening, transcript, clearTranscript, isListening } = useVoice();
   const adaptiveUI = useAdaptiveUI();
   const adaptiveClasses = useAdaptiveClasses();
 
@@ -138,18 +140,75 @@ export function FinancialCoachPage() {
       type: 'coach',
       content: uiComplexity === 'simplified' 
         ? "Hi! I'm your money coach. I help you save and spend better. What would you like to know?"
-        : "Hello! I'm your AI Financial Coach. I analyze your spending patterns, help you set and achieve financial goals, and provide personalized money advice. How can I help you today?",
+        : "Hello! I'm Ziva, your AI Financial Coach. I analyze your spending patterns, help you set and achieve financial goals, and provide personalized money advice. How can I help you today?",
       timestamp: new Date(),
       category: 'advice'
     };
 
     setMessages([welcomeMessage]);
-    setTimeout(() => speak(welcomeMessage.content), 1000);
-  }, [speak, uiComplexity]);
+    
+    // Speak welcome message and start listening if voice mode
+    setTimeout(() => {
+      speak(welcomeMessage.content);
+      if (interactionMode === 'voice') {
+        setTimeout(() => {
+          startListening();
+        }, 2000); // Start listening after welcome message
+      }
+    }, 1000);
+  }, [speak, uiComplexity, interactionMode, startListening]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Handle voice commands
+  useEffect(() => {
+    if (transcript && transcript.trim()) {
+      const voiceMessage = transcript.trim();
+      console.log('Financial coach voice command:', voiceMessage);
+
+      // Send the voice message directly
+      handleVoiceMessage(voiceMessage);
+      clearTranscript();
+    }
+  }, [transcript, clearTranscript]);
+
+  const handleVoiceMessage = async (voiceText: string) => {
+    if (!voiceText || isTyping) return;
+
+    // Add user message
+    const userMessage: CoachMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: voiceText,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage(''); // Clear input
+    setIsTyping(true);
+
+    // Generate AI response
+    setTimeout(async () => {
+      try {
+        const coachResponse = await generateCoachResponse(voiceText);
+        setMessages(prev => [...prev, coachResponse]);
+        
+        if (interactionMode === 'voice') {
+          speak(coachResponse.content);
+          // Restart listening after speaking response
+          setTimeout(() => {
+            startListening();
+          }, 3000); // Wait for speech to finish
+        }
+      } catch (error) {
+        console.error('Error generating coach response:', error);
+      } finally {
+        setIsTyping(false);
+      }
+    }, 1500);
+  };
 
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
 
@@ -206,10 +265,15 @@ export function FinancialCoachPage() {
       }
 
       const result = await response.json();
+      console.log('Gemini API result:', result);
       
       // Determine category based on content
       let category: CoachMessage['category'] = 'advice';
-      const content = result.success ? result.data : result.fallback;
+      const content = result.success ? 
+        (typeof result.data === 'string' ? result.data : result.data?.response || 'I can help you with your financial questions!') : 
+        (typeof result.fallback === 'string' ? result.fallback : 'I can help you with your financial questions!');
+      
+      console.log('Processed content:', content);
       const lowercaseContent = content.toLowerCase();
       
       if (lowercaseContent.includes('goal') || lowercaseContent.includes('target') || lowercaseContent.includes('save')) {
@@ -246,13 +310,15 @@ export function FinancialCoachPage() {
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isTyping) return;
+
+    const messageToSend = inputMessage;
 
     // Add user message
     const userMessage: CoachMessage = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputMessage,
+      content: messageToSend,
       timestamp: new Date()
     };
 
@@ -263,11 +329,15 @@ export function FinancialCoachPage() {
     // Generate AI response
     setTimeout(async () => {
       try {
-        const coachResponse = await generateCoachResponse(inputMessage);
+        const coachResponse = await generateCoachResponse(messageToSend);
         setMessages(prev => [...prev, coachResponse]);
         
         if (interactionMode === 'voice') {
           speak(coachResponse.content);
+          // Restart listening after speaking response
+          setTimeout(() => {
+            startListening();
+          }, 3000); // Wait for speech to finish
         }
       } catch (error) {
         console.error('Error generating coach response:', error);
@@ -278,6 +348,8 @@ export function FinancialCoachPage() {
   };
 
   const handleQuickAction = (action: string) => {
+    if (isTyping) return;
+    
     setInputMessage(action);
     setTimeout(() => handleSendMessage(), 100);
   };
@@ -285,7 +357,7 @@ export function FinancialCoachPage() {
   const renderChat = () => (
     <div className="space-y-6">
       <Card className={adaptiveClasses.card}>
-        <ScrollArea className="h-96 p-4">
+        <ScrollArea className="h-96 p-2">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -336,29 +408,32 @@ export function FinancialCoachPage() {
         </ScrollArea>
       </Card>
 
-      {/* Quick Actions */}
-      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          'How should I save money?',
-          'Help me budget better',
-          'Investment advice for beginners',
-          'Set a savings goal'
-        ].map((action, index) => (
-          <Button
-            key={index}
-            variant="outline"
-            size="sm"
-            onClick={() => handleQuickAction(action)}
-            className={cn(adaptiveClasses.button, "text-xs h-auto p-2")}
-          >
-            {action}
-          </Button>
-        ))}
-      </div>
+      {/* Quick Actions - Only show in text mode */}
+      {interactionMode !== 'voice' && (
+        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            'How should I save money?',
+            'Help me budget better',
+            'Investment advice for beginners',
+            'Set a savings goal'
+          ].map((action, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              size="sm"
+              onClick={() => handleQuickAction(action)}
+              disabled={isTyping}
+              className={cn(adaptiveClasses.button, "text-xs h-auto p-2")}
+            >
+              {action}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Message Input */}
       <div className="flex gap-2">
-        <Input
+        <Textarea
           placeholder="Ask me anything about money..."
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
@@ -383,11 +458,49 @@ export function FinancialCoachPage() {
       </div>
 
       {interactionMode === 'voice' && (
-        <Card className="p-4 bg-primary-red/5 border-primary-red">
-          <p className={cn(adaptiveClasses.text, "text-sm text-primary-red")}>
-            💡 Voice Tip: You can ask "How should I save for a car?" or "Help me invest ₦50,000"
-          </p>
-        </Card>
+        <div className="space-y-3">
+          <Card className="p-4 bg-primary-red/5 border-primary-red">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={cn(adaptiveClasses.text, "text-sm text-primary-red font-medium")}>
+                  🎤 Voice Mode Active
+                </p>
+                <p className={cn(adaptiveClasses.text, "text-xs text-muted-gray")}>
+                  {isListening ? "Listening..." : "How should I save for a car?"}
+                </p>
+              </div>
+              <Button
+                onClick={isListening ? stopListening : startListening}
+                variant={isListening ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "flex items-center gap-2",
+                  isListening && "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                )}
+              >
+                <div className={cn(
+                  "w-2 h-2 rounded-full",
+                  isListening ? "bg-white" : "bg-red-500"
+                )} />
+                {isListening ? "Stop" : "Talk"}
+              </Button>
+            </div>
+            
+            {transcript && (
+              <div className="mt-3 p-2 bg-white rounded border">
+                <p className={cn(adaptiveClasses.text, "text-sm text-gray-700")}>
+                  You said: "{transcript}"
+                </p>
+              </div>
+            )}
+          </Card>
+          
+          {/* <Card className="p-4 bg-blue-50 border-blue-200">
+            <p className={cn(adaptiveClasses.text, "text-sm text-blue-700")}>
+              💡 Voice Tip: You can ask "How should I save for a car?" or "Help me invest ₦50,000"
+            </p>
+          </Card> */}
+        </div>
       )}
     </div>
   );
@@ -683,7 +796,7 @@ export function FinancialCoachPage() {
       </div>
 
       {/* Ziva Assistant */}
-      <ZivaAssistant />
+      {/* <ZivaAssistant /> */}
     </div>
   );
 }

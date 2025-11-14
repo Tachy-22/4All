@@ -68,6 +68,9 @@ export function useAdaptiveUI(): AdaptiveUIConfig {
     let fontSizeBase = preferences.fontSize;
     if (isVisuallyImpaired || preferences.fontSize > 18) {
       fontSizeBase = Math.max(fontSizeBase, 20);
+    } else {
+      // Make normal mode slightly smaller for better proportion
+      fontSizeBase = Math.max(fontSizeBase * 0.9, 14);
     }
 
     // Contrast mode
@@ -86,8 +89,8 @@ export function useAdaptiveUI(): AdaptiveUIConfig {
     const cardSpacing = layoutDensity === 'simplified' ? 'p-6' : 
                        layoutDensity === 'cozy' ? 'p-4' : 'p-3';
     
-    const buttonSize = isMotorImpaired || preferences.largeTargets ? 'h-12 px-6' : 
-                      layoutDensity === 'simplified' ? 'h-11 px-4' : 'h-9 px-3';
+    const buttonSize = isMotorImpaired || preferences.largeTargets ? 'h-10 px-6' : 
+                      layoutDensity === 'simplified' ? 'h-9 px-4' : 'h-8 px-3';
     
     const inputSize = isMotorImpaired || preferences.largeTargets ? 'h-12' : 
                      layoutDensity === 'simplified' ? 'h-11' : 'h-9';

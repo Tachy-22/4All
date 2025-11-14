@@ -13,6 +13,7 @@ import { ZivaAssistant } from '../ziva/ZivaAssistant';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
 import { Mic, Globe, Accessibility, Heart, Shield, Users } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import Image from 'next/image';
 
 const languages = [
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -282,7 +283,7 @@ export function LandingPage() {
 
     // Speak confirmation
     const confirmations: Record<string, string> = {
-      en: "Great! You've selected English. Let's get started with your banking experience.",
+      en: "Great! You've selected English. Let's get started with your banking experience. ",
       pcm: "Nice one! You don select Pidgin. Make we start your banking experience.",
       yo: "Ó dáa! O ti yan Yorùbá. Jẹ́ ká bẹ̀rẹ̀ sí iṣẹ́ banking rẹ.",
       ig: "Ọ dị mma! Ị ahọrọla Igbo. Ka anyị malite ahụmịhe ego gị.",
@@ -291,9 +292,9 @@ export function LandingPage() {
 
     setTimeout(() => {
       speak(confirmations[langCode] || confirmations.en);
-      // Announce page structure for screen readers
+      // Automatically start the onboarding experience after confirmation
       setTimeout(() => {
-        announceToScreenReader('Main banking page loaded. Navigation available: Start your experience, Try demo, or change language. Voice commands: Say Start, Demo, Features, or Change language.');
+        handleStartExperience();
       }, 2000);
     }, 500);
   };
@@ -302,7 +303,7 @@ export function LandingPage() {
     announceToScreenReader('Starting personalized banking onboarding experience.');
     speak('Starting your personalized onboarding. This will help us customize your banking experience.');
     setInteractionMode('voice');
-    
+
     // Show onboarding wizard directly on landing page
     setTimeout(() => {
       setShowOnboardingWizard(true);
@@ -315,7 +316,7 @@ export function LandingPage() {
     setInteractionMode('voice');
     setTimeout(() => router.push('/dashboard'), 1000);
   };
-  
+
   // Handle onboarding completion
   const handleOnboardingComplete = () => {
     setShowOnboardingWizard(false);
@@ -350,9 +351,19 @@ export function LandingPage() {
         <div className="min-h-screen bg-bg-white flex items-center justify-center p-4" role="main" aria-label="Language selection page">
           <div className="w-full max-w-4xl text-center">
             <div className="mb-8">
-              <h1 className="text-4xl md:text-6xl font-bold text-primary-red mb-4" aria-label="4All Banking Application">
+              {/* 4All Logo */}
+              <div className="flex justify-center mb-6 max-h-[10rem]">
+                <Image
+                  src="/logo.png"
+                  alt="4All Banking Logo"
+                  width={1000}
+                  height={1000}
+                  className="rounded-xl w-[20rem] h-full object-contain"
+                />
+              </div>
+              {/* <h1 className="text-4xl md:text-6xl font-bold text-primary-red mb-4" aria-label="4All Banking Application">
                 4All
-              </h1>
+              </h1> */}
               <p className="text-lg md:text-xl text-text mb-2" role="banner">
                 Welcome to Inclusive Banking
               </p>
@@ -383,11 +394,11 @@ export function LandingPage() {
                 </Button>
               </div>
 
-              {isListening && (
+              {/* {isListening && (
                 <div className="bg-blue-50 rounded-lg p-3 max-w-md mx-auto" role="status" aria-live="polite" id="voice-status">
-                  {/* <p className="text-sm text-blue-800 text-center">
+                  <p className="text-sm text-blue-800 text-center">
                     <span className="sr-only">Microphone active.</span>🎤 Say: "English", "Pidgin", "Yoruba", "Igbo", or "Hausa"
-                  </p> */}
+                  </p>
                   {transcript && (
                     <p className="text-sm text-blue-600 mt-1 text-center" aria-live="assertive">
                       <span className="sr-only">Voice input detected:</span>You said: "{transcript}"
@@ -397,7 +408,7 @@ export function LandingPage() {
                     Or press Escape to stop listening, Tab to navigate manually
                   </p>
                 </div>
-              )}
+              )} */}
 
               <p className="text-xs text-muted-gray text-center">
                 Voice commands available - just say your language preference
@@ -506,9 +517,19 @@ export function LandingPage() {
           <section className="pt-20 pb-16 px-4 text-center" aria-labelledby="main-heading">
             <div className="max-w-6xl mx-auto">
               <header className="mb-8">
-                <h1 id="main-heading" className="text-5xl md:text-7xl font-bold text-primary-red mb-4" aria-label="4All Banking Application">
+                {/* 4All Logo */}
+                <div className="flex justify-center mb-6 max-h-[10rem]">
+                  <Image
+                    src="/logo.png"
+                    alt="4All Banking Logo"
+                    width={1000}
+                    height={1000}
+                    className="rounded-xl w-[20rem] h-full object-contain"
+                  />
+                </div>
+                {/* <h1 id="main-heading" className="text-5xl md:text-7xl font-bold text-primary-red mb-4" aria-label="4All Banking Application">
                   4All
-                </h1>
+                </h1> */}
                 <h2 className={cn(adaptiveClasses.heading, "text-3xl md:text-5xl text-text mb-6")}>
                   {content.title}
                 </h2>
@@ -637,7 +658,7 @@ export function LandingPage() {
         </main>
 
         {/* Ziva Assistant */}
-        <ZivaAssistant />
+        {/* <ZivaAssistant /> */}
 
         {/* Screen Reader Announcements */}
         <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -645,7 +666,7 @@ export function LandingPage() {
             <div key={index}>{announcement}</div>
           ))}
         </div>
-        
+
         {/* Hidden help text */}
         <div className="sr-only">
           <p id="keyboard-help">
@@ -663,19 +684,19 @@ export function LandingPage() {
           )}
         </div>
       </div>
-      
+
       {/* Onboarding Wizard Overlay */}
       {showOnboardingWizard && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-white bg-opacity-50 flex items-center justify-center p-">
           <div className="w-full max-w-4xl relative">
-            <button 
+            <button
               onClick={handleOnboardingClose}
               className="absolute -top-12 right-0 text-white hover:text-gray-300 z-10"
               aria-label="Close onboarding"
             >
               ✕ Close
             </button>
-            <OnboardingWizard 
+            <OnboardingWizard
               onComplete={handleOnboardingComplete}
               skipWelcome={true}
               initialLanguage={selectedLanguage}

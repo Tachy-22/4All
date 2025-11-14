@@ -135,6 +135,12 @@ export function SettingsPage() {
           value={profile?.accessibilityPreferences?.fontSize?.toString() || '16'}
           onValueChange={(value) => updateProfile({
             accessibilityPreferences: {
+             // fontSize: 16,
+              contrast: 'normal',
+              ttsSpeed: 1,
+              largeTargets: false,
+              captions: false,
+              font: 'inter',
               ...profile?.accessibilityPreferences,
               fontSize: parseInt(value)
             }
@@ -234,6 +240,12 @@ export function SettingsPage() {
           value={profile?.accessibilityPreferences?.ttsSpeed?.toString() || '1'}
           onValueChange={(value) => updateProfile({
             accessibilityPreferences: {
+              fontSize: 16,
+              contrast: 'normal',
+              //ttsSpeed: 1,
+              largeTargets: false,
+              captions: false,
+              font: 'inter',
               ...profile?.accessibilityPreferences,
               ttsSpeed: parseFloat(value)
             }

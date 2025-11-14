@@ -71,6 +71,7 @@ export function InteractionPreference({ onNext, onBack }: InteractionPreferenceP
 
   return (
     <div className="p-6 space-y-6">
+      
       <div className="text-center">
         <MessageCircle className="w-12 h-12 text-primary-red mx-auto mb-4" />
         <h2 className={cn(adaptiveClasses.heading, "text-2xl text-text mb-4")}>

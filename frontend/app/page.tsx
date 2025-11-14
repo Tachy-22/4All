@@ -1,7 +1,7 @@
 'use client';
 
-import { LandingPage } from '../components/landing/LandingPage';
+import { BankSignin } from '../components/bank/BankSignin';
 
 export default function Home() {
-  return <LandingPage />;
+  return <BankSignin />;
 }

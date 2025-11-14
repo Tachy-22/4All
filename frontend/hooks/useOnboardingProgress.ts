@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DisabilityType } from '../components/onboarding/DisabilityDisclosureModal';
 
 export interface OnboardingStep {
@@ -32,12 +32,14 @@ const defaultSteps: OnboardingStep[] = [
   { id: 'disability_disclosure', title: 'Accessibility Preferences', completed: false },
   { id: 'accessibility_toggles', title: 'Quick Setup', completed: false },
   { id: 'cognitive_quiz', title: 'Personalization Quiz', completed: false },
+  { id: 'personal_data', title: 'Personal Information', completed: false },
   { id: 'summary', title: 'Setup Complete', completed: false }
 ];
 
 export function useOnboardingProgress() {
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [hasExistingProgress, setHasExistingProgress] = useState(false);
+  const isCompletingRef = useRef(false);
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -210,7 +212,17 @@ export function useOnboardingProgress() {
   }, []);
 
   const completeOnboarding = useCallback(async () => {
-    if (!progress) return null;
+    if (!progress || progress.isComplete || isCompletingRef.current) {
+      console.log('Skipping completion - already complete or in progress:', {
+        hasProgress: !!progress,
+        isComplete: progress?.isComplete,
+        isCompleting: isCompletingRef.current
+      });
+      return null;
+    }
+    
+    console.log('Starting onboarding completion...');
+    isCompletingRef.current = true;
     
     // Generate final profile using Gemini AI
     try {
@@ -283,6 +295,8 @@ export function useOnboardingProgress() {
       };
       
       return fallbackProfile;
+    } finally {
+      isCompletingRef.current = false;
     }
   }, [progress]);
 
