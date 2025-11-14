@@ -61,7 +61,7 @@ function showSection(sectionName) {
       title: "Core Banking Activity Overview",
       subtitle: "Account activity, SME tracking, and life event signals",
     },
-    offers: {
+    "offers-promotions": {
       title: "Offers & Promotions Effectiveness",
       subtitle: "Campaign performance and acceptance rates by segment",
     },
@@ -74,15 +74,15 @@ function showSection(sectionName) {
       title: "Emotional Analytics Dashboard",
       subtitle: "Sentiment tracking, frustration metrics, and trust recovery",
     },
-    accessibility: {
+    "accessibility-metrics": {
       title: "Accessibility & Inclusion Metrics",
       subtitle: "Disability engagement and inclusive campaign performance",
     },
-    marketing: {
+    "marketing-insights": {
       title: "Marketing & Campaign Insights",
       subtitle: "AI-suggested campaigns, A/B testing, and ROI predictions",
     },
-    alerts: {
+    "operational-alerts": {
       title: "Operational Alerts & Reports",
       subtitle: "Real-time insights into inclusive banking",
     },

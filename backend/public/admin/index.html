@@ -41,7 +41,7 @@
                 <i class="fas fa-exchange-alt"></i>
                 <span>Banking Activity</span>
             </a>
-            <a href="#offers" class="nav-item" data-section="offers">
+            <a href="#offers" class="nav-item" data-section="offers-promotions">
                 <i class="fas fa-gift"></i>
                 <span>Offers & Promotions</span>
             </a>
@@ -53,15 +53,15 @@
                 <i class="fas fa-heart-pulse"></i>
                 <span>Emotional Analytics</span>
             </a>
-            <a href="#accessibility" class="nav-item" data-section="accessibility">
+            <a href="#accessibility" class="nav-item" data-section="accessibility-metrics">
                 <i class="fas fa-universal-access"></i>
                 <span>Accessibility Metrics</span>
             </a>
-            <a href="#marketing" class="nav-item" data-section="marketing">
+            <a href="#marketing" class="nav-item" data-section="marketing-insights">
                 <i class="fas fa-bullhorn"></i>
                 <span>Marketing Insights</span>
             </a>
-            <a href="#alerts" class="nav-item" data-section="alerts">
+            <a href="#alerts" class="nav-item" data-section="operational-alerts">
                 <i class="fas fa-bell"></i>
                 <span>Operational Alerts</span>
             </a>
@@ -455,7 +455,7 @@
         </section>
 
         <!-- Offers & Promotions Section -->
-        <section id="offers-section" class="content-section">
+        <section id="offers-promotions-section" class="content-section">
             <div class="section-header">
                 <h3><i class="fas fa-gift"></i> Offers & Promotions Effectiveness</h3>
                 <button class="btn-primary" id="create-promotion-btn">
@@ -619,7 +619,7 @@
         </section>
 
         <!-- Accessibility Metrics Section -->
-        <section id="accessibility-section" class="content-section">
+        <section id="accessibility-metrics-section" class="content-section">
             <div class="section-header">
                 <h3><i class="fas fa-universal-access"></i> Accessibility & Inclusion Metrics</h3>
                 <p class="section-subtitle">Disability engagement, inclusive campaigns, and performance heatmaps</p>
@@ -683,7 +683,7 @@
         </section>
 
         <!-- Marketing Insights Section -->
-        <section id="marketing-section" class="content-section">
+        <section id="marketing-insights-section" class="content-section">
             <div class="section-header">
                 <h3><i class="fas fa-bullhorn"></i> Marketing & Campaign Insights</h3>
                 <p class="section-subtitle">AI-suggested campaigns, A/B testing, and ROI predictions</p>
@@ -707,7 +707,7 @@
         </section>
 
         <!-- Operational Alerts Section -->
-        <section id="alerts-section" class="content-section">
+        <section id="operational-alerts-section" class="content-section">
             <div class="section-header">
                 <h3><i class="fas fa-bell"></i> Operational Alerts & Reports</h3>
                 <p class="section-subtitle">Real-time alerts, drill-down capabilities, and voice/text summaries</p>
@@ -811,9 +811,115 @@
         </div>
     </div>
 
+    <!-- AI Chatbot -->
+    <div id="chatbot-container" class="chatbot-container">
+        <!-- Chat Window -->
+        <div id="chat-window" class="chat-window">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <div class="chat-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chat-header-info">
+                        <h4>Ziva AI Assistant</h4>
+                        <span class="chat-status">
+                            <span class="status-dot"></span>
+                            Online
+                        </span>
+                    </div>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="chat-action-btn" id="clear-chat-btn" title="Clear chat">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="chat-action-btn" id="minimize-chat-btn" title="Minimize">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="chat-action-btn" id="close-chat-btn" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chat-messages">
+                <!-- Welcome Message -->
+                <div class="chat-message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            <p>Hello! I'm Ziva, your AI assistant for the 4All Dashboard. I can help you with:</p>
+                            <ul>
+                                <li>📊 Dashboard insights and data interpretation</li>
+                                <li>👥 User analytics and segmentation queries</li>
+                                <li>♿ Accessibility metrics explanations</li>
+                                <li>📢 Campaign and promotion recommendations</li>
+                                <li>🔔 Operational alerts and suggested actions</li>
+                            </ul>
+                            <p>How can I assist you today?</p>
+                        </div>
+                        <span class="message-time">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="chat-suggestions" id="chat-suggestions">
+                <button class="suggestion-chip" data-message="What are the key insights from today's dashboard?">
+                    📊 Today's Insights
+                </button>
+                <button class="suggestion-chip" data-message="Show me users who need support">
+                    🆘 Users Needing Support
+                </button>
+                <button class="suggestion-chip" data-message="Explain accessibility metrics">
+                    ♿ Accessibility Metrics
+                </button>
+                <button class="suggestion-chip" data-message="Suggest a new campaign">
+                    📢 Campaign Ideas
+                </button>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea id="chat-input" class="chat-input" placeholder="Ask me anything about the dashboard..."
+                        rows="1"></textarea>
+                    <button class="chat-send-btn" id="chat-send-btn" title="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="chat-input-hint">
+                    Press <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line, <kbd>Esc</kbd> to close
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle Button -->
+        <button class="chat-toggle-btn" id="chat-toggle-btn" title="Chat with Ziva AI">
+            <i class="fas fa-robot"></i>
+            <span class="chat-notification-badge" id="chat-notification-badge" style="display: none;">1</span>
+        </button>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/chatbot.js"></script>
 </body>
 
 </html>
