@@ -247,8 +247,72 @@ export function FinancialCoachPage() {
             userProfile,
             previousMessages: messages.slice(-5), // Last 5 messages for context
             mockData: {
-              currentBalance: 254800.50,
-              monthlyIncome: 254800,
+              currentBalance: 32486750,
+              monthlyIncome: 450000,
+              currentSalary: 450000,
+              lastSalaryDate: new Date(Date.now() - (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+              nextSalaryDate: new Date(Date.now() + (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+              
+              monthlySpending: {
+                transportation: 85000,
+                food: 120000,
+                utilities: 45000,
+                housing: 180000,
+                healthcare: 25000,
+                entertainment: 35000,
+                clothing: 20000,
+                education: 30000,
+                savings: 90000,
+                miscellaneous: 40000
+              },
+              
+              recentTransactions: [
+                { date: '2024-11-13', description: 'Salary Credit - ABC Corporation', amount: 450000, type: 'credit', category: 'salary' },
+                { date: '2024-11-13', description: 'Automatic Savings Transfer', amount: -90000, type: 'debit', category: 'savings' },
+                { date: '2024-11-12', description: 'Uber Ride - Victoria Island', amount: -3500, type: 'debit', category: 'transportation' },
+                { date: '2024-11-12', description: 'Shoprite - Groceries', amount: -25000, type: 'debit', category: 'food' },
+                { date: '2024-11-11', description: 'DSTV Subscription', amount: -8900, type: 'debit', category: 'utilities' },
+                { date: '2024-11-10', description: 'Transfer to Family', amount: -50000, type: 'debit', category: 'family_support' },
+                { date: '2024-11-10', description: 'Dominos Pizza Order', amount: -12500, type: 'debit', category: 'food' },
+                { date: '2024-11-09', description: 'Filling Station - Total', amount: -15000, type: 'debit', category: 'transportation' },
+                { date: '2024-11-08', description: 'Netflix Subscription', amount: -2900, type: 'debit', category: 'entertainment' },
+                { date: '2024-11-07', description: 'Pharmacy - Healthplus', amount: -8500, type: 'debit', category: 'healthcare' },
+                { date: '2024-11-06', description: 'Jumia Order - Electronics', amount: -45000, type: 'debit', category: 'miscellaneous' },
+                { date: '2024-11-05', description: 'Rent Payment', amount: -180000, type: 'debit', category: 'housing' },
+                { date: '2024-11-04', description: 'IKEDC - Electricity Bill', amount: -25000, type: 'debit', category: 'utilities' },
+                { date: '2024-11-03', description: 'Restaurant - The Place', amount: -18000, type: 'debit', category: 'food' },
+                { date: '2024-11-02', description: 'Coursera Course Fee', amount: -25000, type: 'debit', category: 'education' }
+              ],
+              
+              financialGoals: {
+                emergencyFund: { target: 1350000, current: 275000 },
+                vacation: { target: 200000, current: 45000 },
+                newCar: { target: 2500000, current: 180000 },
+                investment: { target: 500000, current: 120000 }
+              },
+              
+              spendingPatterns: {
+                highestSpendingDay: 'Friday',
+                averageDailySpending: 15000,
+                monthlyGrowthRate: '+12%',
+                topCategories: ['Housing (30%)', 'Food (20%)', 'Transportation (14%)'],
+                unusualSpending: ['₦45,000 electronics purchase on Nov 6'],
+                savingsRate: '20%'
+              },
+              
+              accounts: {
+                savings: { balance: 275000, accountNumber: '012****890' },
+                current: { balance: 186750, accountNumber: '012****567' },
+                fixedDeposit: { balance: 120000, accountNumber: '012****234', maturityDate: '2025-06-15' }
+              },
+              
+              billPayments: [
+                { name: 'IKEDC', amount: 25000, dueDate: '2024-12-05', status: 'paid' },
+                { name: 'Airtel Postpaid', amount: 12000, dueDate: '2024-11-28', status: 'pending' },
+                { name: 'DSTV', amount: 8900, dueDate: '2024-12-10', status: 'paid' },
+                { name: 'Internet - Spectranet', amount: 18000, dueDate: '2024-12-01', status: 'pending' }
+              ],
+              
               recentSpending: {
                 groceries: 35000,
                 dining: 25000,

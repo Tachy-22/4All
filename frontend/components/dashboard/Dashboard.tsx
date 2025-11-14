@@ -27,7 +27,7 @@ import { cn } from '../../lib/utils';
 
 // Mock data for demo
 const mockData = {
-  balance: 254800.50,
+  balance: 32486750,
   accountNumber: '**** **** 4521',
   recentTransactions: [
     { id: 1, type: 'credit', amount: 15000, description: 'Salary Credit', date: '2024-01-10', status: 'completed' },
