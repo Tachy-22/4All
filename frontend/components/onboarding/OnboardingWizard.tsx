@@ -91,7 +91,8 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
     updateCognitiveScore,
     updateAccessibilityToggles,
     completeOnboarding,
-    clearProgress
+    clearProgress,
+    setCurrentStep
   } = useOnboardingProgress();
 
   // Component state
@@ -105,6 +106,13 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   const getCurrentStepName = () => {
     if (!progress) return skipLanguageSelection ? 'interaction_mode' : 'language';
     const stepId = progress.steps[progress.currentStep]?.id || 'language';
+
+    console.log('getCurrentStepName debug:', {
+      currentStep: progress.currentStep,
+      stepId,
+      skipLanguageSelection,
+      totalSteps: progress.steps.length
+    });
 
     // If we're skipping language selection and we're on the language step, 
     // treat it as interaction_mode step
@@ -125,9 +133,9 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       // Start onboarding with the provided language
       startOnboarding(initialLanguage);
       setTimeout(() => {
-        // Mark language step as completed and move to interaction mode
+        // Mark language step as completed and set current step to interaction_mode (step 1)
         updateStep('language', { language: initialLanguage }, true);
-        nextStep(); // Move to interaction_mode step (step 1)
+        setCurrentStep(1); // Explicitly set to step 1 (interaction_mode)
         setTimeout(() => {
           speak('How would you like to interact with the banking app? You can choose voice-first interaction or text-only.');
         }, 100);
@@ -137,7 +145,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       clearProgress();
       startOnboarding(selectedLanguage);
     }
-  }, [skipLanguageSelection, initialLanguage, selectedLanguage, clearProgress, startOnboarding, updateStep, nextStep, speak]);
+  }, [skipLanguageSelection, initialLanguage, selectedLanguage, clearProgress, startOnboarding, updateStep, setCurrentStep, speak]);
 
   // Voice command processing for all steps
   useEffect(() => {
@@ -177,23 +185,8 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
         }
       }
 
-      if (command.includes('voice') || command.includes('voice first') || command.includes('speak') || command.includes('talk')) {
-        console.log('Voice command matched, calling handleInteractionModeSelect("voice")');
-        handleInteractionModeSelect('voice');
-        clearTranscript();
-        return;
-      }
-
-      if (command.includes('text') || command.includes('text only') || command.includes('typing') || command.includes('keyboard')) {
-        console.log('Text command matched, calling handleInteractionModeSelect("text")');
-        handleInteractionModeSelect('text');
-        clearTranscript();
-        return;
-      }
-
-
-      // Interaction mode selection commands
-      if (currentStepName === 'disability_disclosure') {
+      // Interaction mode selection commands - only process during interaction_mode step
+      if (currentStepName === 'interaction_mode') {
         console.log('Processing interaction mode command:', command);
 
         if (command.includes('voice') || command.includes('voice first') || command.includes('speak') || command.includes('talk')) {
@@ -299,8 +292,13 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
       return;
     }
 
-    nextStep();
-    speak('Moving to interaction preferences.');
+    // Mark language step as completed and move to interaction mode
+    updateStep('language', { language: selectedLanguage }, true);
+    nextStep(); // This should move to step 1 (interaction_mode)
+    
+    setTimeout(() => {
+      speak('Great! You\'ve selected ' + languages.find(l => l.code === selectedLanguage)?.name + '. How would you like to interact with the banking app? You can choose voice-first interaction or text-only.');
+    }, 500);
   };
 
   // Toggle voice listening for language selection
@@ -355,9 +353,14 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
 
   // Disability disclosure
   const handleDisabilityDisclosure = (disabilities: DisabilityType[], skipAssistance: boolean) => {
+    console.log('handleDisabilityDisclosure called with:', { disabilities, skipAssistance });
+    console.log('Current progress before updating:', progress);
+    
     setShowDisabilityModal(false);
     updateDisabilities(disabilities);
     updateStep('disability_disclosure', { disabilities, skipAssistance });
+
+    console.log('Updated disabilities in progress, current state:', progress);
 
     // Always move to accessibility toggles next (following the new step order)
     setTimeout(() => {
@@ -411,11 +414,27 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
   // Complete onboarding
   const handleCompleteOnboarding = async () => {
     try {
+      console.log('Starting completeOnboarding, current progress:', progress);
       const finalProfile = await completeOnboarding();
+      console.log('completeOnboarding returned:', finalProfile);
 
       if (finalProfile) {
-        // Save to profile store
-        updateProfile(finalProfile as Partial<UserProfile>);
+        // Get current profile to preserve any existing data
+        const currentProfile = useProfileStore.getState().profile;
+        console.log('Current profile from store:', currentProfile);
+        
+        // Merge final profile with existing profile, preserving disabilities and other data
+        const mergedProfile = {
+          ...currentProfile,
+          ...finalProfile,
+          // Ensure disabilities are preserved from current profile if they exist
+          disabilities: finalProfile.disabilities || currentProfile?.disabilities || []
+        };
+        
+        console.log('Final merged profile:', mergedProfile);
+        
+        // Save merged profile to store
+        updateProfile(mergedProfile as Partial<UserProfile>);
 
         speak('Setup complete! Welcome to your personalized banking experience.');
 
@@ -658,7 +677,7 @@ export function OnboardingWizard({ onComplete, skipWelcome = false, initialLangu
           )}
 
           {/* Interaction Mode Selection Step - Show if current step is interaction_mode OR if we skipped language and step is language */}
-          {(currentStep === 'disability_disclosure' || currentStep === 'interaction_mode' || (currentStep === 'language' && skipLanguageSelection)) && (
+          {(currentStep === 'interaction_mode' || (currentStep === 'language' && skipLanguageSelection)) && (
             <div className="space-y-6">
               
               <div className="text-center space-y-2">

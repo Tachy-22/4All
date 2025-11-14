@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
@@ -104,6 +104,7 @@ export function DisabilityDisclosureModal({
   const [selectedOption, setSelectedOption] = useState<'no' | 'yes' | 'prefer_not_to_say' | null>(null);
   const [selectedDisabilities, setSelectedDisabilities] = useState<DisabilityType[]>([]);
   const [showDetails, setShowDetails] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   const { speak, startListening, stopListening, transcript, clearTranscript, isListening } = useVoice();
   const adaptiveClasses = useAdaptiveClasses();
@@ -115,7 +116,10 @@ export function DisabilityDisclosureModal({
 
     if (option === 'yes') {
       setShowDetails(true);
-      // speak('Please select the areas where you need assistance. You can say: Vision for sight difficulties, Hearing for sound difficulties, Movement for touch difficulties, Focus for concentration difficulties, or Speech for communication difficulties. You can also say multiple options or none to finish.');
+      setTimeout(() => {
+        speak('Here are the available assistance areas: Say "Vision" if you need help with seeing or reading text. Say "Hearing" if you need help with sounds or prefer captions. Say "Movement" if you need larger buttons or have difficulty with precise touch. Say "Focus" if you need simplified screens or help with concentration. Say "Speech" if you prefer text over voice. You can select multiple areas or say "Continue" when finished.');
+        setTimeout(() => startListening(), 8000);
+      }, 500);
     } else {
       setShowDetails(false);
       setSelectedDisabilities([]);
@@ -124,6 +128,7 @@ export function DisabilityDisclosureModal({
       } else {
         speak('No preference selected. We\'ll still offer simplified options when helpful.');
       }
+      setTimeout(() => startListening(), 3000);
     }
   };
   const handleSubmit = () => {
@@ -133,10 +138,15 @@ export function DisabilityDisclosureModal({
   };
 
   const handleDisabilityToggle = (disabilityId: DisabilityType) => {
+    console.log('handleDisabilityToggle called with:', disabilityId);
+    console.log('Current selectedDisabilities:', selectedDisabilities);
+    
     const newDisabilities = selectedDisabilities.includes(disabilityId)
       ? selectedDisabilities.filter(id => id !== disabilityId)
       : [...selectedDisabilities, disabilityId];
 
+    console.log('Calculated newDisabilities:', newDisabilities);
+    
     setSelectedDisabilities(newDisabilities);
 
     // Immediately update the profile store to trigger UI adaptations
@@ -181,143 +191,179 @@ export function DisabilityDisclosureModal({
     if (option) {
       const action = newDisabilities.includes(disabilityId) ? 'selected' : 'deselected';
 
-      // Special message for visual impairment
-      if (disabilityId === 'visual' && newDisabilities.includes('visual')) {
-        speak(`${option.label} ${action}. Your interface is now optimized for visual accessibility with larger text, high contrast, and simplified layout.`);
+      // If selecting (not deselecting), automatically proceed to next step
+      if (newDisabilities.includes(disabilityId)) {
+        // Special message for visual impairment
+        if (disabilityId === 'visual') {
+          speak(`${option.label} ${action}. Your interface is now optimized for visual accessibility. Moving to next step.`);
+        } else {
+          speak(`${option.label} ${action}. Moving to next step.`);
+        }
+        
+        // Capture the disabilities in a local variable to avoid closure issues
+        const disabilitiesToSubmit = [...newDisabilities];
+        console.log('About to auto-submit with disabilities:', disabilitiesToSubmit);
+        
+        // Auto-submit after 2 seconds with the current disabilities
+        setTimeout(() => {
+          console.log('Auto-submit timeout fired, submitting with:', disabilitiesToSubmit);
+          speak('Preferences saved. Moving to next step.');
+          onSubmit(disabilitiesToSubmit, false); // Use captured array
+        }, 2000);
       } else {
-        // Get remaining unselected options
-        const remainingOptions = disabilityOptions
-          .filter(opt => !newDisabilities.includes(opt.id))
-          .map(opt => opt.label);
-
-        const remainingText = remainingOptions.length > 0
-          ? `You can choose another need like ${remainingOptions.join(', ')}, or say Continue when ready.`
-          : 'Say Continue when ready.';
-
-        speak(`${option.label} ${action}. ${remainingText}`);
+        // If deselecting, give option to select another or continue
+        speak(`${option.label} ${action}. You can select another area or say Continue.`);
+        setTimeout(() => {
+          if (!isListening) {
+            startListening();
+          }
+        }, 3000);
       }
     }
   };
 
   // Voice command processing
   useEffect(() => {
-    if (transcript && transcript.trim()) {
-      const command = transcript.toLowerCase();
-      console.log('Disability modal voice command:', command);
+    if (!transcript || !transcript.trim()) return;
+    
+    const command = transcript.toLowerCase();
+    console.log('Disability modal voice command:', command);
 
-      // Main option selection commands
+    // Stop listening immediately to prevent re-triggers
+    if (isListening) {
+      stopListening();
+    }
+    clearTranscript();
+
+    // Main option selection commands
+    if (!selectedOption) {
       if (command.includes('no') || command.includes('no assistance') || command.includes('dont need') || command.includes("don't need")) {
         handleOptionSelect('no');
-        clearTranscript();
         return;
       }
 
       if (command.includes('yes') || command.includes('need assistance') || command.includes('need help')) {
         handleOptionSelect('yes');
-        clearTranscript();
-        // Give detailed voice guidance after a brief delay
-        setTimeout(() => {
-          speak('Here are the available assistance areas: Say "Vision" if you need help with seeing or reading text. Say "Hearing" if you need help with sounds or prefer captions. Say "Movement" if you need larger buttons or have difficulty with precise touch. Say "Focus" if you need simplified screens or help with concentration. Say "Speech" if you prefer text over voice. You can select multiple areas or say "none" when finished.');
-        }, 2000);
         return;
       }
 
       if (command.includes('prefer not') || command.includes('dont say') || command.includes("don't say") || command.includes('no preference')) {
         handleOptionSelect('prefer_not_to_say');
-        clearTranscript();
-        return;
-      }
-
-      // Disability selection commands (when showing details)
-      if (showDetails) {
-        if (command.includes('vision') || command.includes('visual') || command.includes('sight') || command.includes('see')) {
-          handleDisabilityToggle('visual');
-          clearTranscript();
-          return;
-        }
-
-        if (command.includes('hearing') || command.includes('audio') || command.includes('deaf') || command.includes('sound')) {
-          handleDisabilityToggle('hearing');
-          clearTranscript();
-          return;
-        }
-
-        if (command.includes('motor') || command.includes('movement') || command.includes('mobility') || command.includes('hands')) {
-          handleDisabilityToggle('motor');
-          clearTranscript();
-          return;
-        }
-
-        if (command.includes('cognitive') || command.includes('focus') || command.includes('memory') || command.includes('concentration')) {
-          handleDisabilityToggle('cognitive');
-          clearTranscript();
-          return;
-        }
-
-        if (command.includes('speech') || command.includes('speaking') || command.includes('voice') || command.includes('communication')) {
-          handleDisabilityToggle('speech');
-          clearTranscript();
-          return;
-        }
-      }
-
-      // Navigation commands
-      if (command.includes('continue') || command.includes('next') || command.includes('proceed')) {
-        if (selectedOption) {
-          handleSubmit();
-          clearTranscript();
-          return;
-        }
-      }
-
-      if (command.includes('back') || command.includes('previous')) {
-        onClose();
-        clearTranscript();
         return;
       }
 
       // Help command
       if (command.includes('help') || command.includes('what can i say')) {
-        if (!selectedOption) {
-          speak('You can say: No for no assistance, Yes for assistance, or Prefer not to say. You can also say Help for this message.');
-        } else if (showDetails) {
-          speak('You can say: Vision, Hearing, Movement, Focus, or Speech to select assistance areas. Say Continue when ready, or Back to go back.');
-        } else {
-          speak('Say Continue to proceed, or Back to return to the previous step.');
-        }
-        clearTranscript();
+        speak('You can say: No for no assistance, Yes for assistance, or Prefer not to say. You can also say Help for this message.');
+        setTimeout(() => startListening(), 3000);
         return;
       }
 
       // If command not understood
-      if (!selectedOption) {
-        speak('I didn\'t understand. Say No for no assistance, Yes for assistance, or Prefer not to say.');
-      } else if (showDetails) {
-        speak('I didn\'t understand. Try saying: Vision, Hearing, Movement, Focus, or Speech. Or say Continue to proceed.');
-      } else {
-        speak('I didn\'t understand. Say Continue to proceed or Back to go back.');
-      }
-      clearTranscript();
+      speak('I didn\'t understand. Say No for no assistance, Yes for assistance, or Prefer not to say.');
+      setTimeout(() => startListening(), 3000);
+      return;
     }
-  }, [transcript, selectedOption, showDetails, handleOptionSelect, handleSubmit, onClose, speak, clearTranscript]);
 
-  // Auto-start listening and announce when modal opens
+    // Disability selection commands (when showing details)
+    if (showDetails && selectedOption === 'yes') {
+      if (command.includes('vision') || command.includes('visual') || command.includes('sight') || command.includes('see')) {
+        handleDisabilityToggle('visual');
+        return;
+      }
+
+      if (command.includes('hearing') || command.includes('audio') || command.includes('deaf') || command.includes('sound')) {
+        handleDisabilityToggle('hearing');
+        return;
+      }
+
+      if (command.includes('motor') || command.includes('movement') || command.includes('mobility') || command.includes('hands')) {
+        handleDisabilityToggle('motor');
+        return;
+      }
+
+      if (command.includes('cognitive') || command.includes('focus') || command.includes('memory') || command.includes('concentration')) {
+        handleDisabilityToggle('cognitive');
+        return;
+      }
+
+      if (command.includes('speech') || command.includes('speaking') || command.includes('voice') || command.includes('communication')) {
+        handleDisabilityToggle('speech');
+        return;
+      }
+
+      // Help command for details screen
+      if (command.includes('help') || command.includes('what can i say')) {
+        speak('You can say: Vision, Hearing, Movement, Focus, or Speech to select assistance areas. Say Continue when ready, or Back to go back.');
+        setTimeout(() => startListening(), 3000);
+        return;
+      }
+
+      // If command not understood in details
+      speak('I didn\'t understand. Try saying: Vision, Hearing, Movement, Focus, or Speech. Or say Continue to proceed.');
+      setTimeout(() => startListening(), 3000);
+      return;
+    }
+
+    // Navigation commands (available after selection)
+    if (selectedOption) {
+      if (command.includes('continue') || command.includes('next') || command.includes('proceed')) {
+        handleSubmit();
+        return;
+      }
+
+      if (command.includes('back') || command.includes('previous')) {
+        onClose();
+        return;
+      }
+
+      // Help command for selected state
+      if (command.includes('help') || command.includes('what can i say')) {
+        speak('Say Continue to proceed, or Back to return to the previous step.');
+        setTimeout(() => startListening(), 3000);
+        return;
+      }
+
+      // If command not understood after selection
+      speak('I didn\'t understand. Say Continue to proceed or Back to go back.');
+      setTimeout(() => startListening(), 3000);
+      return;
+    }
+  }, [transcript]);
+
+  // Auto-start listening and announce when modal opens - only run once when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
+    if (isOpen && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      const timer1 = setTimeout(() => {
         speak('Help us personalize your experience. Do you need any assistance using apps? You can say: No, Yes, or Prefer not to say.');
-        setTimeout(() => {
+        const timer2 = setTimeout(() => {
           startListening();
         }, 3000);
+        return () => clearTimeout(timer2);
       }, 1000);
-    }
 
+      return () => {
+        clearTimeout(timer1);
+      };
+    }
+  }, [isOpen]); // Only depend on isOpen to prevent re-triggering
+
+  // Reset initialization flag when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      hasInitializedRef.current = false;
+    }
+  }, [isOpen]);
+
+  // Cleanup when modal closes
+  useEffect(() => {
     return () => {
       if (isListening) {
         stopListening();
       }
     };
-  }, [isOpen, speak, startListening, stopListening, isListening]);
+  }, [isListening, stopListening]);
 
   if (!isOpen) return null;
 
